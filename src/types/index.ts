@@ -74,12 +74,12 @@ export interface UiConfig {
         list: NavButtonConfig;
         ranking: NavButtonConfig;
         requests: NavButtonConfig;
-        blog: NavButtonConfig;
+        news: NavButtonConfig;
         suggest: NavButtonConfig;
         setlist: NavButtonConfig;
     }
 }
 
-export type Mode = 'search' | 'list' | 'ranking' | 'requests' | 'blog' | 'setlist';
+export type Mode = 'search' | 'list' | 'ranking' | 'requests' | 'news' | 'setlist';
 
 export type RankingPeriod = 'all' | 'month' | 'year';

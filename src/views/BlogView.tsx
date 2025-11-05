@@ -39,27 +39,26 @@ export const BlogView: React.FC<BlogViewProps> = ({ posts }) => {
         return content.substring(0, maxLength) + '...';
     };
 
-    const SortButton: React.FC<{ order: SortOrder, label: string }> = ({ order, label }) => {
-        const isActive = sortOrder === order;
-        return (
-            <button
-                onClick={() => setSortOrder(order)}
-                className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${isActive ? 'bg-cyan-500 text-white' : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
-                style={{backgroundColor: isActive ? 'var(--primary-color)' : ''}}
-            >
-                {label}
-            </button>
-        );
-    };
-
     return (
         <div className="w-full max-w-3xl mx-auto animate-fade-in">
             <h2 className="text-3xl font-bold text-center mb-2">お知らせ</h2>
             
             <div className="flex justify-center md:justify-end mb-6">
                 <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                    <SortButton order="newest" label="新着順" />
-                    <SortButton order="oldest" label="古い順" />
+                    <button
+                        onClick={() => setSortOrder('newest')}
+                        className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${sortOrder === 'newest' ? 'bg-cyan-500 text-white' : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
+                        style={{backgroundColor: sortOrder === 'newest' ? 'var(--primary-color)' : ''}}
+                    >
+                        新着順
+                    </button>
+                    <button
+                        onClick={() => setSortOrder('oldest')}
+                        className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${sortOrder === 'oldest' ? 'bg-cyan-500 text-white' : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
+                        style={{backgroundColor: sortOrder === 'oldest' ? 'var(--primary-color)' : ''}}
+                    >
+                        古い順
+                    </button>
                 </div>
             </div>
 

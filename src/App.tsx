@@ -91,7 +91,7 @@ const App: React.FC = () => {
                 return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
                 return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings} />;
-            case 'blog':
+            case 'news':
                 return <BlogView posts={posts} />;
             case 'setlist':
                  return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
@@ -112,14 +112,14 @@ const App: React.FC = () => {
             },
             list: { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
             ranking: { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
-            blog: { mode: 'blog', icon: NewspaperIcon, config: uiConfig.navButtons.blog },
+            news: { mode: 'news', icon: NewspaperIcon, config: uiConfig.navButtons.news },
             requests: { mode: 'requests', icon: HeartIcon, config: uiConfig.navButtons.requests },
             suggest: { mode: 'suggest', icon: LightBulbIcon, config: uiConfig.navButtons.suggest },
             setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
         };
 
         const buttonOrder: (keyof typeof uiConfig.navButtons)[] = [
-            'search', 'printGakufu', 'list', 'ranking', 'blog', 'requests', 'suggest', 'setlist'
+            'search', 'printGakufu', 'list', 'ranking', 'news', 'requests', 'suggest', 'setlist'
         ];
 
         return buttonOrder

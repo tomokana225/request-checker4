@@ -74,7 +74,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         }));
     };
     
-    const navButtonKeys: (keyof UiConfig['navButtons'])[] = ['search', 'printGakufu', 'list', 'ranking', 'blog', 'requests', 'suggest', 'setlist'];
+    const navButtonKeys: (keyof UiConfig['navButtons'])[] = ['search', 'printGakufu', 'list', 'ranking', 'news', 'requests', 'suggest', 'setlist'];
 
     return (
         <div>
