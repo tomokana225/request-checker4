@@ -4,7 +4,7 @@ import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { Song } from '../../types';
 import { parseSongs, songsToString } from '../../utils/parser';
 import { XIcon, PlusIcon } from '../../components/ui/Icons';
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 
 
 export const SongListTab: React.FC<{onSaveSongs: (newSongList: string) => Promise<boolean>;}> = ({ onSaveSongs }) => {

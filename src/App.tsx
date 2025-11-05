@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-
+import React, { useState, useEffect, useCallback } from 'react';
 import { useApi } from './hooks/useApi';
-import { Mode } from './types';
+import { Mode, UiConfig } from './types';
 
-import { NavButton } from './components/ui/NavButton';
-import { SearchIcon, ListBulletIcon, TrendingUpIcon, CloudUploadIcon, NewspaperIcon, GiftIcon, VideoCameraIcon, HeartIcon } from './components/ui/Icons';
 import { SearchView } from './views/SearchView';
 import { ListView } from './views/ListView';
 import { RankingView } from './views/RankingView';
@@ -13,182 +10,192 @@ import { BlogView } from './views/BlogView';
 import { AdminModal } from './features/admin/AdminModal';
 import { SuggestSongModal } from './features/suggest/SuggestSongModal';
 import { SupportModal } from './features/support/SupportModal';
+
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
-
-// --- MAIN APP COMPONENT ---
-function App() {
-  const {
-    songs,
-    blogPosts,
-    adminBlogPosts,
-    uiConfig,
-    rankingList,
-    artistRankingList, // Added
-    requestRankingList,
-    connectionStatus,
-    isLoading: isApiLoading,
-    handleSaveSongs,
-    handleSavePost,
-    handleDeletePost,
-    handleSaveUiConfig,
-    logSearchTerm,
-    logRequest,
-    fetchAdminBlogPosts,
-    fetchRankings,
-    fetchRequestRankings,
-  } = useApi();
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
-  const [isSuggestOpen, setIsSuggestOpen] = useState(false);
-  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
-  const [mode, setMode] = useState<Mode>('search');
-  
-  useEffect(() => {
-    document.documentElement.style.setProperty('--primary-color', uiConfig.primaryColor);
-    document.title = uiConfig.mainTitle;
-  }, [uiConfig.primaryColor, uiConfig.mainTitle]);
-
-  const handleAdminOpen = () => {
-      fetchAdminBlogPosts();
-      setIsAdminOpen(true);
-      setSearchTerm('');
-  };
-
-  const handleCopyToClipboard = (text: string) => { 
-    navigator.clipboard.writeText(text); 
-  };
-  
-  const navButtonConfig = useMemo(() => [
-    {key: 'search' as Mode, icon: SearchIcon},
-    {key: 'list' as Mode, icon: ListBulletIcon},
-    {key: 'ranking' as Mode, icon: TrendingUpIcon},
-    {key: 'requests' as Mode, icon: CloudUploadIcon},
-    {key: 'blog' as Mode, icon: NewspaperIcon},
-  ], []);
-
-  const hasSupportLinks = useMemo(() => {
-    return !!uiConfig.ofuseUrl || !!uiConfig.doneruUrl || !!uiConfig.amazonWishlistUrl;
-  }, [uiConfig]);
-
-  const renderCurrentView = () => {
-    switch(mode) {
-      case 'search':
-        return <SearchView 
-                  songs={songs} 
-                  searchTerm={searchTerm} 
-                  setSearchTerm={setSearchTerm} 
-                  onAdminOpen={handleAdminOpen}
-                  logSearchTerm={logSearchTerm}
-                  logRequest={logRequest}
-                  fetchRankings={fetchRankings}
-                  fetchRequestRankings={fetchRequestRankings}
-                />;
-      case 'list':
-        return <ListView songs={songs} />;
-      case 'ranking':
-        return <RankingView songRankingList={rankingList} artistRankingList={artistRankingList} />;
-      case 'requests':
-        return <RequestRankingView rankingList={requestRankingList} />;
-      case 'blog':
-        return <BlogView posts={blogPosts} />;
-      default:
-        return null;
-    }
-  }
-
-  const appStyle = {
-    '--primary-color': uiConfig.primaryColor,
-    backgroundColor: uiConfig.backgroundType === 'color' ? uiConfig.backgroundColor : '#111827'
-  } as React.CSSProperties;
+import { NavButton } from './components/ui/NavButton';
+import { 
+    SearchIcon, 
+    ListBulletIcon, 
+    TrendingUpIcon, 
+    HeartIcon,
+    NewspaperIcon, 
+    GiftIcon,
+    VideoCameraIcon,
+} from './components/ui/Icons';
 
 
-  return (
-    <div className="text-white min-h-screen flex flex-col" style={appStyle}>
-        {connectionStatus !== 'connected' && (
-            <div className={`fixed top-0 left-0 right-0 p-2 text-center text-sm z-50 transition-all duration-300 ${connectionStatus === 'connecting' ? 'bg-blue-600 text-white' : 'bg-yellow-600 text-black'}`}>
-                {connectionStatus === 'connecting' ? 'サーバーに接続中...' : 'サーバーに接続できませんでした。オフラインモードで表示しています。'}
-            </div>
-        )}
-        
-        {uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl && (
-            <div 
-              className="absolute top-0 left-0 w-full h-full bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${uiConfig.backgroundImageUrl})`,
-                opacity: uiConfig.backgroundOpacity,
-              }}
-            ></div>
-        )}
-      
-      <div className="relative z-10 flex-grow container mx-auto px-4 pt-20 pb-24 md:pt-24">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-2 text-shadow-lg animate-fade-in" style={{color: uiConfig.primaryColor}}>{uiConfig.mainTitle}</h1>
-          <p className="text-gray-300 animate-fade-in" style={{animationDelay: '0.2s'}}>{uiConfig.subtitle}</p>
-          <div className="mt-4 flex flex-wrap justify-center items-center gap-4 animate-fade-in" style={{animationDelay: '0.4s'}}>
-            {uiConfig.twitcastingUrl && (
-              <a 
-                href={uiConfig.twitcastingUrl} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white font-semibold transform hover:scale-105"
-              >
-                <VideoCameraIcon className="w-5 h-5 text-cyan-400" />
-                <span>ライブ配信はこちら</span>
-              </a>
+const App: React.FC = () => {
+    const { 
+        songs, 
+        rawSongList,
+        songRankingList, 
+        artistRankingList, 
+        requestRankingList,
+        posts,
+        adminPosts,
+        uiConfig,
+        isLoading, 
+        error, 
+        onSaveSongs,
+        onSaveUiConfig,
+        onSavePost,
+        onDeletePost,
+        logSearch,
+        logRequest,
+        refreshRankings,
+    } = useApi();
+    
+    const [mode, setMode] = useState<Mode>('search');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+    const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
+    const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+
+    useEffect(() => {
+        if(uiConfig.primaryColor) {
+            document.documentElement.style.setProperty('--primary-color', uiConfig.primaryColor);
+        }
+        if(uiConfig.mainTitle) {
+            document.title = uiConfig.mainTitle;
+        }
+    }, [uiConfig]);
+
+    const handleAdminKey = useCallback((e: KeyboardEvent) => {
+        if (e.key === 'a' && e.ctrlKey && e.altKey) {
+            e.preventDefault();
+            const password = prompt('Enter admin password:');
+            // This is a simple, non-secure password check.
+            if (password === 'admin') {
+                setIsAdminModalOpen(true);
+            } else if (password) {
+                alert('Incorrect password.');
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener('keydown', handleAdminKey);
+        return () => window.removeEventListener('keydown', handleAdminKey);
+    }, [handleAdminKey]);
+    
+    const handleSongSelectFromSuggest = (text: string) => {
+        setMode('search');
+        setSearchTerm(text);
+        setIsSuggestModalOpen(false);
+    };
+
+    const renderView = () => {
+        if (isLoading) return <div className="flex justify-center items-center mt-20"><LoadingSpinner className="w-12 h-12" /></div>;
+        if (error) return <p className="text-center text-red-400 mt-20">Error: {error}</p>;
+
+        switch (mode) {
+            case 'search':
+                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />;
+            case 'list':
+                return <ListView songs={songs} />;
+            case 'ranking':
+                return <RankingView songRankingList={songRankingList} artistRankingList={artistRankingList} />;
+            case 'requests':
+                return <RequestRankingView rankingList={requestRankingList} />;
+            case 'blog':
+                return <BlogView posts={posts} />;
+            default:
+                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />;
+        }
+    };
+    
+    const navButtonsConfig: { mode: Mode, icon: React.FC<{className?:string}>, config: keyof UiConfig['navButtons']}[] = [
+        { mode: 'search', icon: SearchIcon, config: 'search' },
+        { mode: 'list', icon: ListBulletIcon, config: 'list' },
+        { mode: 'ranking', icon: TrendingUpIcon, config: 'ranking' },
+        { mode: 'requests', icon: HeartIcon, config: 'requests' },
+        { mode: 'blog', icon: NewspaperIcon, config: 'blog' },
+    ];
+
+    const backgroundStyle: React.CSSProperties = {
+        backgroundColor: uiConfig.backgroundType === 'color' ? uiConfig.backgroundColor : '#111827',
+    };
+    
+    const hasSupportLinks = uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl;
+
+    return (
+        <div style={backgroundStyle} className="min-h-screen text-white font-sans transition-colors duration-500">
+             {uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl && (
+                <div 
+                    className="absolute inset-0 bg-cover bg-center -z-10"
+                    style={{
+                        backgroundImage: `url(${uiConfig.backgroundImageUrl})`,
+                        opacity: uiConfig.backgroundOpacity,
+                    }}
+                />
             )}
-             {hasSupportLinks && (
-               <button 
-                onClick={() => setIsSupportModalOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-700 rounded-lg transition-colors text-white font-semibold transform hover:scale-105"
-              >
-                <HeartIcon className="w-5 h-5" />
-                <span>サポートする</span>
-              </button>
-            )}
-          </div>
-        </header>
-        
-        <main>
-          {isApiLoading && mode !== 'search' ? (
-             <div className="w-full max-w-2xl mx-auto mt-8 p-6 text-center flex items-center justify-center gap-4">
-                <LoadingSpinner className="w-6 h-6 text-gray-400" />
-                <p className="text-lg text-gray-300">読み込み中...</p>
+             <div className="absolute inset-0 bg-black/50 -z-10" />
+
+            <div className="container mx-auto px-4 py-8 relative z-0">
+                <header className="text-center mb-8 animate-fade-in-down">
+                    <h1 className="text-4xl md:text-5xl font-extrabold" style={{ color: uiConfig.primaryColor }}>{uiConfig.mainTitle}</h1>
+                    <p className="text-gray-300 mt-2">{uiConfig.subtitle}</p>
+                </header>
+
+                <div className="flex justify-center flex-wrap gap-2 md:gap-4 mb-8">
+                     {uiConfig.twitcastingUrl && (
+                        <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg shadow-md transition-transform transform hover:scale-105 font-semibold text-sm">
+                            <VideoCameraIcon className="w-4 h-4" /> 配信はこちら
+                        </a>
+                    )}
+                    {uiConfig.navButtons.suggest.enabled && (
+                        <button onClick={() => setIsSuggestModalOpen(true)} className="flex items-center justify-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg shadow-md transition-transform transform hover:scale-105 font-semibold text-sm">
+                            <GiftIcon className="w-4 h-4" /> {uiConfig.navButtons.suggest.label}
+                        </button>
+                    )}
+                    {hasSupportLinks && (
+                        <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center justify-center gap-2 px-4 py-2 bg-pink-500 hover:bg-pink-600 rounded-lg shadow-md transition-transform transform hover:scale-105 font-semibold text-sm">
+                            <HeartIcon className="w-4 h-4" /> サポート
+                        </button>
+                    )}
+                </div>
+
+                <nav className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 max-w-4xl mx-auto mb-8">
+                   {navButtonsConfig.filter(b => uiConfig.navButtons[b.config]?.enabled).map(button => (
+                        <NavButton 
+                            key={button.mode}
+                            onClick={() => { setMode(button.mode); if (button.mode !== 'search') setSearchTerm(''); }}
+                            isActive={mode === button.mode}
+                            IconComponent={button.icon}
+                            label={uiConfig.navButtons[button.config]?.label}
+                        />
+                   ))}
+                </nav>
+
+                <main>
+                    {renderView()}
+                </main>
             </div>
-          ) : renderCurrentView() }
-        </main>
-      </div>
-      
-      <nav className="sticky bottom-0 z-20 bg-gray-900/80 backdrop-blur-sm border-t border-gray-700">
-          <div className="container mx-auto p-2">
-              <div className="grid grid-cols-3 gap-2 max-w-md mx-auto">
-                  {navButtonConfig.map(btn => {
-                      const config = uiConfig.navButtons[btn.key];
-                      if (!config.enabled) return null;
-                      return <NavButton key={btn.key} onClick={() => setMode(btn.key)} isActive={mode === btn.key} IconComponent={btn.icon} label={config.label} />
-                  })}
-                  {uiConfig.navButtons.suggest.enabled && 
-                      <NavButton onClick={() => setIsSuggestOpen(true)} IconComponent={GiftIcon} label={uiConfig.navButtons.suggest.label} />
-                  }
-              </div>
-          </div>
-      </nav>
-        
-      <AdminModal 
-          isOpen={isAdminOpen} 
-          onClose={() => setIsAdminOpen(false)} 
-          songs={songs} 
-          posts={adminBlogPosts} 
-          uiConfig={uiConfig}
-          onSaveSongs={handleSaveSongs}
-          onSavePost={handleSavePost}
-          onDeletePost={handleDeletePost}
-          onSaveUiConfig={handleSaveUiConfig}
-      />
-      <SuggestSongModal isOpen={isSuggestOpen} onClose={() => setIsSuggestOpen(false)} songs={songs} onSelect={handleCopyToClipboard}/>
-      <SupportModal isOpen={isSupportModalOpen} onClose={() => setIsSupportModalOpen(false)} uiConfig={uiConfig} />
-    </div>
-  );
-}
+            
+            <AdminModal 
+                isOpen={isAdminModalOpen}
+                onClose={() => setIsAdminModalOpen(false)}
+                songs={songs}
+                posts={adminPosts}
+                uiConfig={uiConfig}
+                onSaveSongs={onSaveSongs}
+                onSavePost={onSavePost}
+                onDeletePost={onDeletePost}
+                onSaveUiConfig={onSaveUiConfig}
+            />
+            <SuggestSongModal 
+                isOpen={isSuggestModalOpen}
+                onClose={() => setIsSuggestModalOpen(false)}
+                songs={songs}
+                onSelect={handleSongSelectFromSuggest}
+            />
+            <SupportModal 
+                isOpen={isSupportModalOpen}
+                onClose={() => setIsSupportModalOpen(false)}
+                uiConfig={uiConfig}
+            />
+        </div>
+    );
+};
 
 export default App;

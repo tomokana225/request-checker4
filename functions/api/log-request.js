@@ -1,8 +1,8 @@
-// This serverless function runs on Cloudflare.
-// It logs song requests from users for songs not in the repertoire.
+// This serverless function runs on Cloudflare, not in the user's browser.
+// It logs song requests to Firestore.
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore/lite';
+import { getFirestore, doc, getDoc, setDoc, writeBatch } from 'firebase/firestore/lite';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -41,44 +41,51 @@ export async function onRequest(context) {
     if (request.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
     }
-    
-    const successHeaders = { 'Content-Type': 'application/json', ...CORS_HEADERS };
 
+    const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
+        status,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+    });
+    
     let app;
     try {
         app = await getFirebaseApp(env);
     } catch (e) {
         console.warn("Firebase Init Failed:", e.message);
-        return new Response(JSON.stringify({ error: "Server configuration error." }), { 
-            status: 500, 
-            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-        });
+        return jsonResponse({ error: "Server configuration error." }, 500);
     }
 
     const db = getFirestore(app);
 
     try {
-        const { term } = await request.json();
-        const requestTerm = term?.trim();
+        const { term, requester } = await request.json();
 
-        if (!requestTerm) {
-            return new Response(JSON.stringify({ error: "Request term is empty." }), { status: 400, headers: successHeaders });
+        if (!term || typeof term !== 'string' || term.trim().length === 0) {
+            return jsonResponse({ error: "Invalid song title provided." }, 400);
         }
+        
+        const songTitle = term.trim();
 
-        const requestRef = doc(db, 'songRequests', requestTerm);
+        const batch = writeBatch(db);
+        const requestRef = doc(db, 'songRequests', songTitle);
         const requestDocSnap = await getDoc(requestRef);
         
         const newCount = (requestDocSnap.exists() ? requestDocSnap.data().count : 0) + 1;
         
-        await setDoc(requestRef, { count: newCount }, { merge: true });
+        const dataToSet = { 
+            count: newCount, 
+            lastRequester: requester || 'anonymous',
+            lastRequestedAt: Date.now()
+        };
 
-        return new Response(JSON.stringify({ success: true }), { status: 200, headers: successHeaders });
+        batch.set(requestRef, dataToSet, { merge: true });
+        
+        await batch.commit();
+
+        return jsonResponse({ success: true });
 
     } catch (error) {
         console.warn('Logging request failed:', error);
-        return new Response(JSON.stringify({ error: "Internal logging error" }), { 
-            status: 500, 
-            headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-        });
+        return jsonResponse({ error: 'Failed to log request.' }, 500);
     }
 }
