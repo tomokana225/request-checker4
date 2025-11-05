@@ -77,8 +77,8 @@ ${JSON.stringify(songsWithoutKana.map(s => ({ title: s.title, artist: s.artist }
                     config: { responseMimeType: "application/json" }
                 });
 
-                const rawJson = response.text.trim().replace(/^```json\s*|```\s*$/g, '');
-                const kanaResults = JSON.parse(rawJson);
+                const rawJson = (response.text ?? '').trim().replace(/^```json\s*|```\s*$/g, '');
+                const kanaResults = rawJson ? JSON.parse(rawJson) : [];
                 
                 const kanaMap = new Map<string, { title: string, artist: string }>();
                 kanaResults.forEach((res: any) => {

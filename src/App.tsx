@@ -27,7 +27,6 @@ import {
 const App: React.FC = () => {
     const { 
         songs, 
-        rawSongList,
         songRankingList, 
         artistRankingList, 
         requestRankingList,
@@ -96,7 +95,7 @@ const App: React.FC = () => {
             case 'ranking':
                 return <RankingView songRankingList={songRankingList} artistRankingList={artistRankingList} />;
             case 'requests':
-                return <RequestRankingView rankingList={requestRankingList} />;
+                return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings}/>;
             case 'blog':
                 return <BlogView posts={posts} />;
             default:

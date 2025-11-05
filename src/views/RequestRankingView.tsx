@@ -1,12 +1,84 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { RequestRankingItem } from '../types';
-import { HeartIcon, YouTubeIcon, DocumentTextIcon } from '../components/ui/Icons';
+import { HeartIcon, YouTubeIcon, DocumentTextIcon, CloudUploadIcon, ExternalLinkIcon } from '../components/ui/Icons';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface RequestRankingViewProps {
     rankingList: RequestRankingItem[];
+    logRequest: (term: string, requester: string) => Promise<void>;
+    refreshRankings: () => void;
 }
 
-export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingList }) => {
+const RequestForm: React.FC<{
+    logRequest: (term: string, requester: string) => Promise<void>;
+    refreshRankings: () => void;
+}> = ({ logRequest, refreshRankings }) => {
+    const [songTitle, setSongTitle] = useState('');
+    const [casId, setCasId] = useState('');
+    const [isSending, setIsSending] = useState(false);
+    const [sentMessage, setSentMessage] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!songTitle.trim()) {
+            alert('曲名を入力してください。');
+            return;
+        }
+        setIsSending(true);
+        await logRequest(songTitle, casId);
+        setIsSending(false);
+        setSentMessage(`「${songTitle}」をリクエストしました！`);
+        setSongTitle('');
+        setCasId('');
+        refreshRankings();
+        setTimeout(() => setSentMessage(''), 4000);
+    };
+
+    return (
+        <div className="bg-gray-800/50 p-6 rounded-lg mb-8 border border-gray-700">
+            <h3 className="text-xl font-bold text-center mb-4">曲をリクエストする</h3>
+             <form onSubmit={handleSubmit} className="space-y-4">
+                 <div>
+                    <label htmlFor="songTitle" className="block text-sm text-left font-medium text-gray-300 mb-1">曲名 <span className="text-red-400">*</span></label>
+                    <input
+                        id="songTitle"
+                        type="text"
+                        value={songTitle}
+                        onChange={(e) => setSongTitle(e.target.value)}
+                        placeholder="アイドル / YOASOBI"
+                        required
+                        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="casId_form" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 (任意)</label>
+                    <input
+                        id="casId_form"
+                        type="text"
+                        value={casId}
+                        onChange={(e) => setCasId(e.target.value)}
+                        placeholder="@の後ろのIDを入力"
+                        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
+                    />
+                </div>
+                <div className="text-xs text-left text-gray-400 bg-gray-900/50 p-3 rounded-md space-y-1">
+                    <p>※リクエストに必ずお応えできるわけではありません。</p>
+                    <p>※<a href="https://www.print-gakufu.com/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">「ぷりんと楽譜」<ExternalLinkIcon className="inline-block w-3 h-3"/></a>にある曲は初見で弾ける可能性があります。</p>
+                </div>
+                {sentMessage ? (
+                    <p className="text-center text-green-400 h-12 flex items-center justify-center">{sentMessage}</p>
+                ) : (
+                    <button type="submit" disabled={isSending} className="w-full h-12 flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                        {isSending ? <LoadingSpinner className="w-5 h-5"/> : <CloudUploadIcon className="w-5 h-5" />}
+                        {isSending ? '送信中...' : 'この内容でリクエスト'}
+                    </button>
+                )}
+            </form>
+        </div>
+    );
+};
+
+export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingList, logRequest, refreshRankings }) => {
     const getMedal = (rank: number) => {
         if (rank === 1) return '🥇';
         if (rank === 2) return '🥈';
@@ -22,14 +94,17 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingL
 
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
-            <h2 className="text-3xl font-bold text-center mb-4 flex items-center justify-center gap-3">
+            <h2 className="text-3xl font-bold text-center mb-2 flex items-center justify-center gap-3">
                 <HeartIcon className="w-8 h-8 text-pink-400"/>
-                リクエストランキング
+                リクエスト
             </h2>
-            <p className="text-center text-gray-400 mb-6 text-sm">
-                このリストの曲は弾けるようになるかも？<br />
-                楽譜があれば初見で弾ける可能性も！
+             <p className="text-center text-gray-400 mb-8 text-sm">
+                弾けるようになるかも？リストにない曲はリクエスト！
             </p>
+            
+            <RequestForm logRequest={logRequest} refreshRankings={refreshRankings} />
+
+            <h3 className="text-xl font-bold text-center mb-4">現在のリクエストランキング</h3>
 
             {rankingList.length > 0 ? (
                 <div className="space-y-3">
@@ -55,7 +130,7 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingL
                     })}
                 </div>
             ) : (
-                <p className="text-center text-gray-400 mt-8">リクエストランキングデータを読み込んでいます...</p>
+                <p className="text-center text-gray-400 mt-8">まだリクエストはありません。</p>
             )}
         </div>
     );
