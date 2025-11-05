@@ -16,7 +16,7 @@ const DEFAULT_UI_CONFIG: UiConfig = {
         list: { label: 'List', enabled: true },
         ranking: { label: 'Ranking', enabled: true },
         requests: { label: 'Requests', enabled: true },
-        blog: { label: 'Blog', enabled: true },
+        blog: { label: 'お知らせ', enabled: true },
         suggest: { label: 'Suggest', enabled: true },
         setlist: { label: 'セトリ提案', enabled: true },
     }

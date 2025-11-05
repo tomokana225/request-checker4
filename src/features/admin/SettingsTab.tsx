@@ -7,6 +7,15 @@ interface SettingsTabProps {
     onSaveUiConfig: (config: UiConfig) => Promise<boolean>;
 }
 
+const backgroundPresets = [
+  { name: '楽譜', url: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070&auto=format&fit=crop' },
+  { name: 'ピアノ', url: 'https://images.unsplash.com/photo-1520444453406-52ab68434346?q=80&w=2070&auto=format&fit=crop' },
+  { name: 'ステージ', url: 'https://images.unsplash.com/photo-1543305986-a783e7a68028?q=80&w=2070&auto=format&fit=crop' },
+  { name: 'ギター', url: 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=2070&auto=format&fit=crop' },
+  { name: 'レコード', url: 'https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5b?q=80&w=1974&auto=format&fit=crop' },
+];
+
+
 export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConfig }) => {
     const [config, setConfig] = useState<UiConfig>(uiConfig);
     const [isSaving, setIsSaving] = useState(false);
@@ -55,56 +64,74 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
             <h3 className="text-lg font-semibold mb-4">基本設定</h3>
             <div className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-300">メインタイトル</label>
-                    <input type="text" name="mainTitle" value={config.mainTitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">メインタイトル</label>
+                    <input type="text" name="mainTitle" value={config.mainTitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-300">サブタイトル</label>
-                    <input type="text" name="subtitle" value={config.subtitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">サブタイトル</label>
+                    <input type="text" name="subtitle" value={config.subtitle} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-300">ツイキャスURL</label>
-                    <input type="text" name="twitcastingUrl" value={config.twitcastingUrl || ''} onChange={handleInputChange} placeholder="https://twitcasting.tv/..." className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ツイキャスURL</label>
+                    <input type="text" name="twitcastingUrl" value={config.twitcastingUrl || ''} onChange={handleInputChange} placeholder="https://twitcasting.tv/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-300">テーマカラー</label>
-                    <input type="color" name="primaryColor" value={config.primaryColor} onChange={handleInputChange} className="mt-1 h-10 w-full block bg-gray-700 border-gray-600 rounded-md p-1" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">テーマカラー</label>
+                    <input type="color" name="primaryColor" value={config.primaryColor} onChange={handleInputChange} className="mt-1 h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
                 </div>
             </div>
             
             <h3 className="text-lg font-semibold mb-4 mt-8">背景設定</h3>
-            <div className="bg-gray-800 p-4 rounded-lg space-y-4">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg space-y-4">
                  <div className="flex items-center gap-6">
                     <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="backgroundType" value="color" checked={config.backgroundType === 'color'} onChange={handleInputChange} className="form-radio h-4 w-4 text-cyan-600 bg-gray-700 border-gray-600 focus:ring-cyan-500" />
+                        <input type="radio" name="backgroundType" value="color" checked={config.backgroundType === 'color'} onChange={handleInputChange} className="form-radio h-4 w-4 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:ring-cyan-500" />
                         単色
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="backgroundType" value="image" checked={config.backgroundType === 'image'} onChange={handleInputChange} className="form-radio h-4 w-4 text-cyan-600 bg-gray-700 border-gray-600 focus:ring-cyan-500" />
+                        <input type="radio" name="backgroundType" value="image" checked={config.backgroundType === 'image'} onChange={handleInputChange} className="form-radio h-4 w-4 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:ring-cyan-500" />
                         画像
                     </label>
                 </div>
                 {config.backgroundType === 'color' ? (
                     <div>
-                        <label className="block text-sm font-medium text-gray-300">背景色</label>
-                        <input type="color" name="backgroundColor" value={config.backgroundColor} onChange={handleInputChange} className="mt-1 h-10 w-full block bg-gray-700 border-gray-600 rounded-md p-1" />
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">背景色</label>
+                        <input type="color" name="backgroundColor" value={config.backgroundColor} onChange={handleInputChange} className="mt-1 h-10 w-full block bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md p-1" />
                     </div>
                 ) : (
                     <div className="space-y-4">
                         <div>
-                             <label className="block text-sm font-medium text-gray-300">背景画像URL</label>
-                             <input type="text" name="backgroundImageUrl" value={config.backgroundImageUrl} onChange={handleInputChange} placeholder="https://example.com/background.png" className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2"/>
-                            <p className="mt-2 text-xs text-gray-400">画像をご自身で用意し、公開URLを貼り付けてください。</p>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">プリセットから選択</label>
+                            <div className="mt-2 grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                {backgroundPresets.map(preset => (
+                                    <button
+                                        key={preset.name}
+                                        type="button"
+                                        onClick={() => setConfig(prev => ({ ...prev, backgroundImageUrl: preset.url }))}
+                                        className={`relative rounded-lg overflow-hidden border-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-cyan-500 ${config.backgroundImageUrl === preset.url ? 'border-cyan-500' : 'border-transparent hover:border-gray-500'}`}
+                                    >
+                                        <img src={preset.url} alt={preset.name} className="h-20 w-full object-cover" />
+                                        <div className="absolute inset-0 bg-black/30 flex items-end justify-center p-1">
+                                            <p className="text-white text-xs font-semibold text-center leading-tight">{preset.name}</p>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">または、カスタム画像URL</label>
+                             <input type="text" name="backgroundImageUrl" value={config.backgroundImageUrl} onChange={handleInputChange} placeholder="https://example.com/background.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2"/>
                             {config.backgroundImageUrl && (
                                 <div className="mt-2">
-                                    <p className="text-xs text-gray-400 mb-1">プレビュー:</p>
-                                    <img src={config.backgroundImageUrl} alt="Preview" className="max-h-32 rounded-md border-2 border-gray-600" onError={(e) => e.currentTarget.style.display = 'none'} onLoad={(e) => e.currentTarget.style.display = 'block'}/>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">プレビュー:</p>
+                                    <img src={config.backgroundImageUrl} alt="Preview" className="max-h-32 rounded-md border-2 border-gray-300 dark:border-gray-600" onError={(e) => e.currentTarget.style.display = 'none'} onLoad={(e) => e.currentTarget.style.display = 'block'}/>
                                 </div>
                             )}
                         </div>
                         <div>
-                             <label className="block text-sm font-medium text-gray-300">画像の不透明度: {Math.round(config.backgroundOpacity * 100)}%</label>
-                             <input type="range" name="backgroundOpacity" min="0" max="1" step="0.01" value={config.backgroundOpacity} onChange={handleRangeChange} className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer" />
+                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">画像の不透明度: {Math.round(config.backgroundOpacity * 100)}%</label>
+                             <input type="range" name="backgroundOpacity" min="0" max="1" step="0.01" value={config.backgroundOpacity} onChange={handleRangeChange} className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" />
                         </div>
                     </div>
                 )}
@@ -113,34 +140,34 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
             <h3 className="text-lg font-semibold mb-4 mt-8">投げ銭・サポート設定</h3>
             <div className="space-y-4">
                  <div>
-                    <label className="block text-sm font-medium text-gray-300">OFUSE URL</label>
-                    <input type="text" name="ofuseUrl" value={config.ofuseUrl || ''} onChange={handleInputChange} placeholder="https://ofuse.me/..." className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">OFUSE URL</label>
+                    <input type="text" name="ofuseUrl" value={config.ofuseUrl || ''} onChange={handleInputChange} placeholder="https://ofuse.me/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
                  <div>
-                    <label className="block text-sm font-medium text-gray-300">Doneru URL</label>
-                    <input type="text" name="doneruUrl" value={config.doneruUrl || ''} onChange={handleInputChange} placeholder="https://doneru.jp/..." className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Doneru URL</label>
+                    <input type="text" name="doneruUrl" value={config.doneruUrl || ''} onChange={handleInputChange} placeholder="https://doneru.jp/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
                  <div>
-                    <label className="block text-sm font-medium text-gray-300">Amazon ほしい物リスト URL</label>
-                    <input type="text" name="amazonWishlistUrl" value={config.amazonWishlistUrl || ''} onChange={handleInputChange} placeholder="https://www.amazon.jp/hz/wishlist/..." className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amazon ほしい物リスト URL</label>
+                    <input type="text" name="amazonWishlistUrl" value={config.amazonWishlistUrl || ''} onChange={handleInputChange} placeholder="https://www.amazon.jp/hz/wishlist/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
             </div>
 
             <h3 className="text-lg font-semibold mb-4 mt-8">ナビゲーションボタン設定</h3>
             <div className="space-y-3">
                 {navButtonKeys.map(key => (
-                    <div key={key} className="bg-gray-800 p-3 rounded-md flex items-center gap-4">
-                        <input type="checkbox" checked={config.navButtons[key].enabled} onChange={(e) => handleNavChange(key, 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500" />
+                    <div key={key} className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
+                        <input type="checkbox" checked={config.navButtons[key].enabled} onChange={(e) => handleNavChange(key, 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
                         <div className="flex-grow">
-                             <input type="text" value={config.navButtons[key].label} onChange={(e) => handleNavChange(key, 'label', e.target.value)} className="w-full bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
+                             <input type="text" value={config.navButtons[key].label} onChange={(e) => handleNavChange(key, 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
                         </div>
                     </div>
                 ))}
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-4">
-                 {saveStatus === 'success' && <p className="text-green-400">保存しました！</p>}
-                {saveStatus === 'error' && <p className="text-red-400">保存に失敗しました。</p>}
+                 {saveStatus === 'success' && <p className="text-green-500 dark:text-green-400">保存しました！</p>}
+                {saveStatus === 'error' && <p className="text-red-500 dark:text-red-400">保存に失敗しました。</p>}
                 <button
                     onClick={handleSave}
                     disabled={isSaving}

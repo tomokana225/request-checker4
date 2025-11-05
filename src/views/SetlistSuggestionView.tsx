@@ -1,7 +1,10 @@
+
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Song } from '../types';
 import { SearchIcon, XIcon, PlusIcon, CheckCircleIcon, ChevronLeftIcon } from '../components/ui/Icons';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { containsNGWord } from '../utils/validation';
 
 const MAX_SONGS = 5;
 
@@ -80,6 +83,10 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
             alert('ツイキャスアカウント名を入力してください。');
             return;
         }
+        if (containsNGWord(requester)) {
+            alert('不適切な単語が含まれているため、送信できません。');
+            return;
+        }
         setIsSubmitting(true);
         const songTitles = selectedSongs.map(s => `${s.title} / ${s.artist}`);
         const success = await onSave(songTitles, requester);
@@ -103,7 +110,7 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
                         placeholder="曲を検索..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
-                        className="w-full bg-gray-700 border border-gray-600 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
+                        className="w-full bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)]"
                     />
                 </div>
                 <div className="h-96 overflow-y-auto custom-scrollbar pr-2 space-y-2">
@@ -111,15 +118,15 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
                         const isSelected = isSongSelected(song);
                         const isFull = selectedSongs.length >= MAX_SONGS;
                         return (
-                            <div key={`${song.title}-${song.artist}`} className="bg-gray-800 p-3 rounded-md flex justify-between items-center">
+                            <div key={`${song.title}-${song.artist}`} className="bg-white dark:bg-gray-800 p-3 rounded-md flex justify-between items-center shadow-sm">
                                 <div>
                                     <p className="font-semibold">{song.title}</p>
-                                    <p className="text-sm text-gray-400">{song.artist}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{song.artist}</p>
                                 </div>
                                 <button
                                     onClick={() => handleAddSong(song)}
                                     disabled={isSelected || isFull}
-                                    className="p-2 rounded-full bg-cyan-600 hover:bg-cyan-500 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                                    className="p-2 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                                 >
                                     <PlusIcon className="w-5 h-5"/>
                                 </button>
@@ -132,13 +139,13 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
             {/* Right Column: Selected Setlist */}
             <div>
                 <h3 className="text-xl font-bold mb-4">あなたのセトリ ({selectedSongs.length}/{MAX_SONGS})</h3>
-                <div className="h-96 bg-gray-900/50 p-4 rounded-lg flex flex-col">
+                <div className="h-96 bg-gray-200 dark:bg-gray-900/50 p-4 rounded-lg flex flex-col">
                     {selectedSongs.length > 0 ? (
                         <div className="space-y-2 flex-grow overflow-y-auto custom-scrollbar">
                            {selectedSongs.map((song, index) => (
                                 <div
                                     key={`${song.title}-${song.artist}`}
-                                    className="bg-gray-800 p-3 rounded-md flex justify-between items-center cursor-move"
+                                    className="bg-white dark:bg-gray-800 p-3 rounded-md flex justify-between items-center cursor-move shadow-sm"
                                     draggable
                                     onDragStart={() => handleDragStart(song)}
                                     onDragEnter={() => handleDragEnter(song)}
@@ -146,20 +153,20 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
                                     onDragOver={(e) => e.preventDefault()}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <span className="text-gray-400 font-bold">{index + 1}</span>
+                                        <span className="text-gray-500 dark:text-gray-400 font-bold">{index + 1}</span>
                                         <div>
                                             <p className="font-semibold">{song.title}</p>
-                                            <p className="text-sm text-gray-400">{song.artist}</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">{song.artist}</p>
                                         </div>
                                     </div>
-                                    <button onClick={() => handleRemoveSong(song)} className="p-1 rounded-full hover:bg-red-500/20 text-red-400">
+                                    <button onClick={() => handleRemoveSong(song)} className="p-1 rounded-full hover:bg-red-500/10 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400">
                                         <XIcon className="w-5 h-5"/>
                                     </button>
                                 </div>
                            ))}
                         </div>
                     ) : (
-                        <div className="flex-grow flex items-center justify-center text-gray-500">
+                        <div className="flex-grow flex items-center justify-center text-gray-500 dark:text-gray-500">
                             <p>左のリストから曲を追加してください<br/>(ドラッグ＆ドロップで順番を入れ替えられます)</p>
                         </div>
                     )}
@@ -167,7 +174,7 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
                  <button 
                     onClick={() => setStep('confirmation')}
                     disabled={selectedSongs.length === 0}
-                    className="w-full mt-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition disabled:bg-gray-600 disabled:cursor-not-allowed"
+                    className="w-full mt-4 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed"
                 >
                     この内容で提案に進む
                 </button>
@@ -177,24 +184,24 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
 
     const renderConfirmationStep = () => (
         <div className="max-w-md mx-auto">
-             <button onClick={() => setStep('selection')} className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 font-semibold mb-4">
+             <button onClick={() => setStep('selection')} className="flex items-center gap-2 text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 dark:hover:text-cyan-300 font-semibold mb-4">
                 <ChevronLeftIcon className="w-4 h-4" />
                 <span>曲の選択に戻る</span>
             </button>
             <h3 className="text-2xl font-bold text-center mb-4">提案するセトリの確認</h3>
-            <div className="bg-gray-800/50 p-4 rounded-lg mb-6">
+            <div className="bg-gray-100 dark:bg-gray-800/50 p-4 rounded-lg mb-6">
                 <ol className="list-decimal list-inside space-y-3">
                     {selectedSongs.map(song => (
                         <li key={`${song.title}-${song.artist}`} className="pl-2">
                              <p className="font-semibold text-lg">{song.title}</p>
-                             <p className="text-sm text-gray-400 ml-1">- {song.artist}</p>
+                             <p className="text-sm text-gray-500 dark:text-gray-400 ml-1">- {song.artist}</p>
                         </li>
                     ))}
                 </ol>
             </div>
              
             <div>
-                <label htmlFor="requester_id" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 <span className="text-red-400">*</span></label>
+                <label htmlFor="requester_id" className="block text-sm text-left font-medium text-gray-700 dark:text-gray-300 mb-1">ツイキャスアカウント名 <span className="text-red-500 dark:text-red-400">*</span></label>
                 <input
                     id="requester_id"
                     type="text"
@@ -202,15 +209,15 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
                     onChange={(e) => setRequester(e.target.value)}
                     placeholder="IDかアカウント名を入力"
                     required
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
+                    className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
                 />
-                <p className="text-xs text-gray-400 text-left mt-1">配信者のみに公開されます。</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-left mt-1">配信者のみに公開されます。</p>
             </div>
             
              <button
                 onClick={handleSubmit}
                 disabled={isSubmitting || !requester.trim()}
-                className="w-full mt-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full mt-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
                 {isSubmitting ? <LoadingSpinner className="w-5 h-5" /> : null}
                 {isSubmitting ? '送信中...' : 'このセトリを提案する'}
@@ -219,10 +226,10 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
     );
 
      const renderSuccessStep = () => (
-        <div className="text-center p-6 bg-gray-800/50 rounded-lg max-w-md mx-auto flex flex-col items-center gap-4">
-            <CheckCircleIcon className="w-16 h-16 text-green-400"/>
+        <div className="text-center p-6 bg-gray-100 dark:bg-gray-800/50 rounded-lg max-w-md mx-auto flex flex-col items-center gap-4">
+            <CheckCircleIcon className="w-16 h-16 text-green-500 dark:text-green-400"/>
             <h3 className="text-2xl font-bold">リクエストありがとうございました！</h3>
-            <p className="text-lg text-gray-300">セットリストの提案を送信しました。<br/>3秒後に検索画面に戻ります。</p>
+            <p className="text-lg text-gray-700 dark:text-gray-300">セットリストの提案を送信しました。<br/>3秒後に検索画面に戻ります。</p>
         </div>
     );
 

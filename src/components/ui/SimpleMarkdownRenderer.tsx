@@ -12,11 +12,11 @@ export const SimpleMarkdownRenderer: React.FC<{ content: string }> = React.memo(
                 .replace(/>/g, '&gt;')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">$1</a>')
+                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-cyan-600 dark:text-cyan-400 hover:underline">$1</a>')
             );
             return <p key={index} className="mb-4" dangerouslySetInnerHTML={{ __html: lines.join('<br />') }} />;
         });
     }, [content]);
 
-    return <div className="text-gray-300 leading-relaxed whitespace-pre-wrap">{renderContent}</div>;
+    return <div className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{renderContent}</div>;
 });

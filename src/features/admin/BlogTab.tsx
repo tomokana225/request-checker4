@@ -99,27 +99,27 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
             <div className="md:col-span-1 flex flex-col min-h-0">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold">お知らせ一覧</h3>
-                    <button onClick={handleNewPost} className="flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300 font-semibold p-2 bg-gray-700 hover:bg-gray-600 rounded-md">
+                    <button onClick={handleNewPost} className="flex items-center gap-1 text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-semibold p-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md">
                         <PlusIcon className="w-4 h-4" />
                         新規作成
                     </button>
                 </div>
-                <div className="flex-grow bg-gray-800 rounded-md p-2 overflow-y-auto custom-scrollbar">
+                <div className="flex-grow bg-gray-100 dark:bg-gray-800 rounded-md p-2 overflow-y-auto custom-scrollbar">
                     {posts.length > 0 ? (
                         <ul className="space-y-2">
                             {posts.map(post => (
                                 <li key={post.id}>
-                                    <button onClick={() => handleSelectPost(post)} className={`w-full text-left p-3 rounded-md transition ${selectedPost?.id === post.id ? 'bg-cyan-600/50' : 'hover:bg-gray-700'}`}>
+                                    <button onClick={() => handleSelectPost(post)} className={`w-full text-left p-3 rounded-md transition ${selectedPost?.id === post.id ? 'bg-cyan-100 dark:bg-cyan-600/50' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
                                         <p className="font-semibold truncate">{post.title}</p>
-                                        <p className="text-xs text-gray-400">
-                                            {post.isPublished ? <span className="text-green-400">公開済み</span> : <span className="text-yellow-400">下書き</span>}
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                                            {post.isPublished ? <span className="text-green-600 dark:text-green-400">公開済み</span> : <span className="text-yellow-600 dark:text-yellow-400">下書き</span>}
                                             {' - '}{formatDate(post.createdAt)}
                                         </p>
                                     </button>
                                 </li>
                             ))}
                         </ul>
-                    ) : ( <p className="text-gray-400 text-center py-4">記事がありません。</p> )}
+                    ) : ( <p className="text-gray-500 dark:text-gray-400 text-center py-4">記事がありません。</p> )}
                 </div>
             </div>
 
@@ -129,26 +129,26 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
                         <h3 className="text-lg font-semibold mb-4">{selectedPost.id ? '記事を編集' : '新規記事を作成'}</h3>
                         <div className="flex-grow space-y-4 overflow-y-auto custom-scrollbar pr-2">
                             <div>
-                                <label className="block text-sm font-medium text-gray-300">タイトル</label>
-                                <input type="text" name="title" value={selectedPost.title || ''} onChange={handleInputChange} className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">タイトル</label>
+                                <input type="text" name="title" value={selectedPost.title || ''} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-300">内容 (Markdown対応)</label>
-                                <textarea name="content" value={selectedPost.content || ''} onChange={handleInputChange} rows={10} className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2 custom-scrollbar focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">内容 (Markdown対応)</label>
+                                <textarea name="content" value={selectedPost.content || ''} onChange={handleInputChange} rows={10} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 custom-scrollbar focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-300">アイキャッチ画像URL</label>
-                                <input type="text" name="imageUrl" value={selectedPost.imageUrl || ''} onChange={handleInputChange} placeholder="https://example.com/image.png" className="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">アイキャッチ画像URL</label>
+                                <input type="text" name="imageUrl" value={selectedPost.imageUrl || ''} onChange={handleInputChange} placeholder="https://example.com/image.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
                                 {selectedPost.imageUrl && (
                                     <div className="mt-2 relative">
-                                        <p className="text-xs text-gray-400 mb-1">プレビュー:</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">プレビュー:</p>
                                         <img src={selectedPost.imageUrl} alt="preview" className="max-h-40 rounded-md" onError={(e) => e.currentTarget.style.display = 'none'} onLoad={(e) => e.currentTarget.style.display = 'block'}/>
                                     </div>
                                 )}
                             </div>
                              <div className="flex items-center gap-2">
-                                <input id="isPublished" name="isPublished" type="checkbox" checked={selectedPost.isPublished || false} onChange={handleCheckboxChange} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500" />
-                                <label htmlFor="isPublished" className="font-medium text-gray-300">公開する</label>
+                                <input id="isPublished" name="isPublished" type="checkbox" checked={selectedPost.isPublished || false} onChange={handleCheckboxChange} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
+                                <label htmlFor="isPublished" className="font-medium text-gray-700 dark:text-gray-300">公開する</label>
                             </div>
                         </div>
                         <div className="mt-6 flex items-center justify-between flex-shrink-0">
@@ -161,8 +161,8 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
                                 )}
                             </div>
                             <div className="flex items-center gap-4">
-                                {saveStatus === 'success' && <p className="text-green-400">保存しました！</p>}
-                                {saveStatus === 'error' && <p className="text-red-400">保存に失敗しました。</p>}
+                                {saveStatus === 'success' && <p className="text-green-500 dark:text-green-400">保存しました！</p>}
+                                {saveStatus === 'error' && <p className="text-red-500 dark:text-red-400">保存に失敗しました。</p>}
                                 <button onClick={handleSave} disabled={isSaving} className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-md disabled:bg-gray-500 flex items-center gap-2">
                                     {isSaving ? <LoadingSpinner className="w-5 h-5" /> : null}
                                     {isSaving ? '保存中...' : '保存する'}
@@ -171,8 +171,8 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
                         </div>
                     </>
                 ) : (
-                    <div className="flex items-center justify-center h-full bg-gray-800 rounded-md">
-                        <p className="text-gray-400">記事を選択するか、新規作成してください。</p>
+                    <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-800 rounded-md">
+                        <p className="text-gray-500 dark:text-gray-400">記事を選択するか、新規作成してください。</p>
                     </div>
                 )}
             </div>

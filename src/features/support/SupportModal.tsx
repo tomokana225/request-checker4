@@ -13,7 +13,7 @@ const SupportLinkButton: React.FC<{ href: string; label: string }> = ({ href, la
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center justify-center gap-3 w-full text-center px-6 py-4 bg-gray-700 hover:bg-gray-600 rounded-lg font-semibold transition-transform transform hover:scale-105"
+        className="flex items-center justify-center gap-3 w-full text-center px-6 py-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-lg font-semibold transition-transform transform hover:scale-105"
     >
         {label}
         <ExternalLinkIcon className="w-5 h-5" />
@@ -28,8 +28,8 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, uiC
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={onClose}>
-            <div className="bg-gray-800 rounded-lg shadow-2xl w-full max-w-md text-center p-8 relative" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white"><XIcon className="w-6 h-6" /></button>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-md text-center p-8 relative" onClick={e => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"><XIcon className="w-6 h-6" /></button>
                 <div className="flex justify-center items-center gap-3 mb-4">
                     <HeartIcon className="w-8 h-8 text-pink-500" />
                     <h2 className="text-2xl font-bold">配信者をサポートする</h2>
@@ -41,13 +41,13 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, uiC
                         {uiConfig.doneruUrl && (
                             <div>
                                 <SupportLinkButton href={uiConfig.doneruUrl} label="Doneru で支援する" />
-                                <p className="text-xs text-yellow-300 mt-1">「どねる」を使うと高い還元率で配信者を応援できます</p>
+                                <p className="text-xs text-yellow-600 dark:text-yellow-300 mt-1">「どねる」を使うと高い還元率で配信者を応援できます</p>
                             </div>
                         )}
                         {uiConfig.amazonWishlistUrl && <SupportLinkButton href={uiConfig.amazonWishlistUrl} label="ほしい物リストを見る" />}
                     </div>
                 ) : (
-                    <p className="text-gray-400 mt-6">現在設定されているサポートリンクはありません。</p>
+                    <p className="text-gray-500 dark:text-gray-400 mt-6">現在設定されているサポートリンクはありません。</p>
                 )}
             </div>
         </div>

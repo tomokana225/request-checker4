@@ -122,41 +122,41 @@ ${JSON.stringify(songsWithoutKana.map(s => ({ title: s.title, artist: s.artist }
     return (
         <div>
             <h3 className="text-lg font-semibold mb-2">曲リストを編集 (Excel等から貼付)</h3>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 <code>曲名,アーティスト名,ジャンル,new,練習中</code> の形式で入力してください。下のリストと連動します。
             </p>
             <textarea
                 value={songString}
                 onChange={(e) => setSongString(e.target.value)}
-                className="w-full h-64 bg-gray-800 border border-gray-700 rounded-md p-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] custom-scrollbar"
+                className="w-full h-64 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md p-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] custom-scrollbar"
                 placeholder="夜に駆ける,YOASOBI,J-Pop,new..."
             />
             
             <h3 className="text-lg font-semibold mt-6 mb-2">クリックで編集</h3>
             <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar pr-2">
                 {songs.map((song, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 items-center bg-gray-800 p-2 rounded-md">
-                        <input type="text" value={song.title} onChange={(e) => updateSong(index, { title: e.target.value })} placeholder="曲名" className="col-span-4 bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
-                        <input type="text" value={song.artist} onChange={(e) => updateSong(index, { artist: e.target.value })} placeholder="アーティスト" className="col-span-4 bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
+                    <div key={index} className="grid grid-cols-12 gap-2 items-center bg-white dark:bg-gray-800 p-2 rounded-md">
+                        <input type="text" value={song.title} onChange={(e) => updateSong(index, { title: e.target.value })} placeholder="曲名" className="col-span-4 bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
+                        <input type="text" value={song.artist} onChange={(e) => updateSong(index, { artist: e.target.value })} placeholder="アーティスト" className="col-span-4 bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"/>
                         <div className="col-span-3 flex gap-2">
-                            <button onClick={() => updateSong(index, { isNew: !song.isNew })} className={`text-xs px-2 py-1 rounded-full ${song.isNew ? 'bg-yellow-500 text-black' : 'bg-gray-600 text-white'}`}>NEW</button>
-                            <button onClick={() => updateSong(index, { status: song.status === 'practicing' ? 'playable' : 'practicing' })} className={`text-xs px-2 py-1 rounded-full ${song.status === 'practicing' ? 'bg-blue-500 text-white' : 'bg-gray-600 text-white'}`}>練習中</button>
+                            <button onClick={() => updateSong(index, { isNew: !song.isNew })} className={`text-xs px-2 py-1 rounded-full ${song.isNew ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white'}`}>NEW</button>
+                            <button onClick={() => updateSong(index, { status: song.status === 'practicing' ? 'playable' : 'practicing' })} className={`text-xs px-2 py-1 rounded-full ${song.status === 'practicing' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white'}`}>練習中</button>
                         </div>
                         <button onClick={() => deleteSong(index)} className="col-span-1 text-red-500 hover:text-red-400"><XIcon className="w-5 h-5"/></button>
                     </div>
                 ))}
             </div>
-             <button onClick={addSong} className="mt-3 flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 font-semibold py-2 px-3 bg-gray-700 hover:bg-gray-600 rounded-md">
+             <button onClick={addSong} className="mt-3 flex items-center gap-2 text-sm text-cyan-500 dark:text-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-300 font-semibold py-2 px-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md">
                 <PlusIcon className="w-4 h-4" />
                 曲を追加
             </button>
 
 
             <div className="mt-6 flex flex-col sm:flex-row items-center justify-end gap-4">
-                <p className="text-xs text-gray-400 text-right">保存時に、漢字や英語の曲名・アーティスト名に<br/>自動でふりがな（カタカナ）を追加します。</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-right">保存時に、漢字や英語の曲名・アーティスト名に<br/>自動でふりがな（カタカナ）を追加します。</p>
                 <div className="flex items-center gap-4">
-                    {saveStatus === 'success' && <p className="text-green-400">保存しました！</p>}
-                    {saveStatus === 'error' && <p className="text-red-400">失敗しました。</p>}
+                    {saveStatus === 'success' && <p className="text-green-500 dark:text-green-400">保存しました！</p>}
+                    {saveStatus === 'error' && <p className="text-red-500 dark:text-red-400">失敗しました。</p>}
                     <button
                         onClick={handleSave}
                         disabled={isSaving || isGeneratingKana}

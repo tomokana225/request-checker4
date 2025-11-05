@@ -44,7 +44,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ posts }) => {
         return (
             <button
                 onClick={() => setSortOrder(order)}
-                className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${isActive ? 'bg-cyan-500 text-white' : 'bg-gray-800 hover:bg-gray-700 text-gray-300'}`}
+                className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${isActive ? 'bg-cyan-500 text-white' : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
                 style={{backgroundColor: isActive ? 'var(--primary-color)' : ''}}
             >
                 {label}
@@ -57,7 +57,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ posts }) => {
             <h2 className="text-3xl font-bold text-center mb-2">お知らせ</h2>
             
             <div className="flex justify-center md:justify-end mb-6">
-                <div className="flex items-center gap-2 p-1 bg-gray-700 rounded-lg">
+                <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
                     <SortButton order="newest" label="新着順" />
                     <SortButton order="oldest" label="古い順" />
                 </div>
@@ -68,7 +68,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ posts }) => {
                     {sortedPosts.map(post => (
                         <article 
                             key={post.id} 
-                            className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-[1.02] cursor-pointer"
+                            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-[1.02] cursor-pointer"
                             onClick={() => setSelectedPost(post)}
                         >
                             {post.imageUrl && (
@@ -79,18 +79,18 @@ export const BlogView: React.FC<BlogViewProps> = ({ posts }) => {
                                 />
                             )}
                             <div className="p-6">
-                                <h3 className="text-2xl font-bold text-white mb-2">{post.title}</h3>
-                                <p className="text-sm text-gray-400 mb-4">{formatDate(post.createdAt)}</p>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{post.title}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{formatDate(post.createdAt)}</p>
                                 <SimpleMarkdownRenderer content={truncateContent(post.content, 120)} />
                                 {post.content.length > 120 && (
-                                     <p className="mt-4 font-semibold text-cyan-400 hover:text-cyan-300">続きを読む...</p>
+                                     <p className="mt-4 font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 dark:hover:text-cyan-300">続きを読む...</p>
                                 )}
                             </div>
                         </article>
                     ))}
                 </div>
             ) : (
-                <p className="text-center text-gray-400 mt-8">まだお知らせはありません。</p>
+                <p className="text-center text-gray-500 dark:text-gray-400 mt-8">まだお知らせはありません。</p>
             )}
 
             {selectedPost && (

@@ -30,7 +30,7 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
     const TabButton: React.FC<{ tab: AdminTab; label: string }> = ({ tab, label }) => (
         <button
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition ${activeTab === tab ? 'bg-gray-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition ${activeTab === tab ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white' : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
         >
             {label}
         </button>
@@ -38,12 +38,12 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={onClose}>
-            <div className="bg-gray-900 rounded-lg shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
-                <header className="flex items-center justify-between p-4 border-b border-gray-700">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col text-gray-900 dark:text-white" onClick={e => e.stopPropagation()}>
+                <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 className="text-xl font-bold">管理パネル</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white"><XIcon className="w-6 h-6" /></button>
+                    <button onClick={onClose} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white"><XIcon className="w-6 h-6" /></button>
                 </header>
-                <div className="border-b border-gray-700 px-4">
+                <div className="border-b border-gray-200 dark:border-gray-700 px-4">
                     <nav className="flex space-x-2">
                         <TabButton tab="songs" label="曲リスト管理" />
                         <TabButton tab="blog" label="お知らせ管理" />
@@ -51,7 +51,7 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                         <TabButton tab="settings" label="アプリ設定" />
                     </nav>
                 </div>
-                <main className="flex-grow p-6 overflow-y-auto custom-scrollbar min-h-0">
+                <main className="flex-grow p-6 overflow-y-auto custom-scrollbar min-h-0 bg-gray-50 dark:bg-gray-900/50">
                     {activeTab === 'songs' && <SongListTab {...props} />}
                     {activeTab === 'blog' && <BlogTab {...props} />}
                     {activeTab === 'setlists' && <SetlistSuggestionsTab suggestions={props.setlistSuggestions} />}
