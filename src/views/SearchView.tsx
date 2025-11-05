@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Song, SearchResult } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
 import { SearchIcon, XIcon, PlusIcon } from '../components/ui/Icons';
@@ -12,15 +12,19 @@ interface SearchViewProps {
     refreshRankings: () => void;
     searchTerm: string;
     setSearchTerm: (term: string) => void;
+    setIsAdminModalOpen: (isOpen: boolean) => void;
 }
 
 const SEARCH_DEBOUNCE_MS = 300;
 const MAX_RELATED_SONGS = 5;
 
-export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logRequest, refreshRankings, searchTerm, setSearchTerm }) => {
+export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logRequest, refreshRankings, searchTerm, setSearchTerm, setIsAdminModalOpen }) => {
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+    const [suggestions, setSuggestions] = useState<Song[]>([]);
+    const searchContainerRef = useRef<HTMLDivElement>(null);
+
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -40,12 +44,43 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
         }));
     }, [songs]);
 
+    // Update suggestions based on search term
+    useEffect(() => {
+        if (searchTerm.trim().length > 1) {
+            const normalizedTerm = normalizeForSearch(searchTerm);
+            const filteredSuggestions = normalizedSongs
+                .filter(s => 
+                    s.normalizedTitle.includes(normalizedTerm) || 
+                    s.normalizedArtist.includes(normalizedTerm)
+                )
+                .map(s => s.original)
+                .slice(0, 10); // Limit to 10 suggestions
+            setSuggestions(filteredSuggestions);
+        } else {
+            setSuggestions([]);
+        }
+    }, [searchTerm, normalizedSongs]);
+
     const performSearch = useCallback((term: string) => {
+        if (term.trim().toLowerCase() === 'admin') {
+            const password = prompt('Enter admin password:');
+            if (password === 'admin') {
+                setIsAdminModalOpen(true);
+            } else if (password) {
+                alert('Incorrect password.');
+            }
+            setSearchTerm(''); 
+            setSuggestions([]);
+            setSearchResult(null);
+            return;
+        }
+        
         if (!term.trim()) {
             setSearchResult(null);
             return;
         }
 
+        setSuggestions([]); // Hide suggestions after search
         const normalizedTerm = normalizeForSearch(term);
         logSearch(normalizedTerm);
         
@@ -78,14 +113,40 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
             });
         }
 
-    }, [logSearch, normalizedSongs]);
+    }, [logSearch, normalizedSongs, setIsAdminModalOpen, setSearchTerm]);
 
     useEffect(() => {
-        performSearch(debouncedSearchTerm);
+        if (debouncedSearchTerm.trim()) {
+             performSearch(debouncedSearchTerm);
+        } else {
+            setSearchResult(null);
+        }
     }, [debouncedSearchTerm, performSearch]);
+
+    // Close suggestions when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+                setSuggestions([]);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
     
     const handleRequestSuccess = () => {
         refreshRankings();
+    };
+
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        performSearch(searchTerm);
+    };
+
+    const handleSuggestionClick = (song: Song) => {
+        const newSearchTerm = `${song.title}`;
+        setSearchTerm(newSearchTerm);
+        performSearch(newSearchTerm);
     };
 
     const renderResult = () => {
@@ -131,22 +192,46 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
     };
     
     return (
-        <div className="w-full max-w-2xl mx-auto">
-            <div className="relative">
-                <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="曲名 or アーティスト名"
-                    className="w-full bg-gray-700 border border-gray-600 rounded-full py-3 pl-12 pr-12 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
-                />
-                {searchTerm && (
-                    <button onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
-                        <XIcon className="w-6 h-6" />
+        <div className="w-full max-w-2xl mx-auto" ref={searchContainerRef}>
+            <form onSubmit={handleSearchSubmit} className="relative">
+                <div className="flex">
+                     <div className="relative flex-grow">
+                        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="曲名 or アーティスト名"
+                            className="w-full bg-gray-700 border border-gray-600 rounded-l-full py-3 pl-12 pr-12 text-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
+                            autoComplete="off"
+                        />
+                        {searchTerm && (
+                            <button type="button" onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                                <XIcon className="w-6 h-6" />
+                            </button>
+                        )}
+                    </div>
+                    <button type="submit" className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-r-full flex items-center justify-center transition" style={{backgroundColor: 'var(--primary-color)'}}>
+                        <SearchIcon className="w-6 h-6" />
                     </button>
+                </div>
+
+                {suggestions.length > 0 && (
+                    <ul className="absolute z-10 w-full mt-1 bg-gray-800 border border-gray-600 rounded-lg shadow-lg overflow-hidden max-h-80 overflow-y-auto custom-scrollbar">
+                        {suggestions.map((song, index) => (
+                            <li 
+                                key={`${song.title}-${index}`}
+                                onClick={() => handleSuggestionClick(song)}
+                                onMouseDown={(e) => e.preventDefault()}
+                                className="px-4 py-3 cursor-pointer hover:bg-gray-700 transition"
+                            >
+                                <span className="font-semibold">{song.title}</span>
+                                <span className="text-sm text-gray-400 ml-2">- {song.artist}</span>
+                            </li>
+                        ))}
+                    </ul>
                 )}
-            </div>
+            </form>
             {renderResult()}
             {isRequestModalOpen && searchResult?.searchTerm && (
                  <RequestSongModal 

@@ -20,8 +20,8 @@ const RequestForm: React.FC<{
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!songTitle.trim()) {
-            alert('曲名を入力してください。');
+        if (!songTitle.trim() || !casId.trim()) {
+            alert('曲名とツイキャスアカウント名は必須です。');
             return;
         }
         setIsSending(true);
@@ -29,14 +29,14 @@ const RequestForm: React.FC<{
         setIsSending(false);
         setSentMessage(`「${songTitle}」をリクエストしました！`);
         setSongTitle('');
-        setCasId('');
+        // casId is kept for convenience
         refreshRankings();
         setTimeout(() => setSentMessage(''), 4000);
     };
 
     return (
         <div className="bg-gray-800/50 p-6 rounded-lg mb-8 border border-gray-700">
-            <h3 className="text-xl font-bold text-center mb-4">曲をリクエストする</h3>
+            <h3 className="text-xl font-bold text-center mb-4">リストにない曲をリクエスト</h3>
              <form onSubmit={handleSubmit} className="space-y-4">
                  <div>
                     <label htmlFor="songTitle" className="block text-sm text-left font-medium text-gray-300 mb-1">曲名 <span className="text-red-400">*</span></label>
@@ -51,15 +51,17 @@ const RequestForm: React.FC<{
                     />
                 </div>
                 <div>
-                    <label htmlFor="casId_form" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 (任意)</label>
+                    <label htmlFor="casId_form" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 <span className="text-red-400">*</span></label>
                     <input
                         id="casId_form"
                         type="text"
                         value={casId}
                         onChange={(e) => setCasId(e.target.value)}
                         placeholder="@の後ろのIDを入力"
+                        required
                         className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
                     />
+                    <p className="text-xs text-gray-400 text-left mt-1">配信者のみに公開されます。</p>
                 </div>
                 <div className="text-xs text-left text-gray-400 bg-gray-900/50 p-3 rounded-md space-y-1">
                     <p>※リクエストに必ずお応えできるわけではありません。</p>
@@ -78,7 +80,84 @@ const RequestForm: React.FC<{
     );
 };
 
+
+const RankingActions: React.FC<{
+    logRequest: (term: string, requester: string) => Promise<void>;
+    refreshRankings: () => void;
+}> = ({ logRequest, refreshRankings }) => {
+    const [voterId, setVoterId] = useState('');
+    const [isRequestingSetlist, setIsRequestingSetlist] = useState(false);
+    const [actionMessage, setActionMessage] = useState('');
+
+    const showActionMessage = (msg: string) => {
+        setActionMessage(msg);
+        setTimeout(() => setActionMessage(''), 3000);
+    };
+    
+    const handleRequestSetlist = async () => {
+        if (!voterId.trim()) {
+            alert('リクエストするには、まずツイキャスアカウント名を入力してください。');
+            return;
+        }
+        setIsRequestingSetlist(true);
+        await logRequest('配信のセトリ', voterId);
+        refreshRankings();
+        setIsRequestingSetlist(false);
+        showActionMessage('「配信のセトリ」をリクエストしました！');
+    };
+
+    return(
+        <div className="bg-gray-800/50 p-6 rounded-lg mb-8 border border-gray-700">
+            <h3 className="text-xl font-bold text-center mb-4">配信のセトリをリクエスト</h3>
+            <div className="mb-4">
+                <label htmlFor="voterId_input" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 <span className="text-red-400">*</span></label>
+                <input
+                    id="voterId_input"
+                    type="text"
+                    value={voterId}
+                    onChange={(e) => setVoterId(e.target.value)}
+                    placeholder="@の後ろのIDを入力"
+                    required
+                    className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
+                />
+                <p className="text-xs text-gray-400 text-left mt-1">配信者のみに公開されます。</p>
+            </div>
+            {actionMessage ? (
+                <p className="text-center text-green-400 h-12 flex items-center justify-center">{actionMessage}</p>
+            ) : (
+                <button onClick={handleRequestSetlist} disabled={isRequestingSetlist} className="w-full h-12 flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 rounded-lg font-semibold transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed">
+                    {isRequestingSetlist ? <LoadingSpinner className="w-5 h-5"/> : <CloudUploadIcon className="w-5 h-5" />}
+                    {isRequestingSetlist ? '送信中...' : 'セトリをリクエスト'}
+                </button>
+            )}
+        </div>
+    );
+};
+
+
 export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingList, logRequest, refreshRankings }) => {
+    const [likeVoterId, setLikeVoterId] = useState('');
+    const [isLiking, setIsLiking] = useState<string | null>(null);
+    const [likeMessage, setLikeMessage] = useState('');
+    
+    const showLikeMessage = (msg: string) => {
+        setLikeMessage(msg);
+        setTimeout(() => setLikeMessage(''), 3000);
+    };
+
+    const handleLike = async (songTitle: string) => {
+        if (!likeVoterId.trim()) {
+            alert('投票するには、まずツイキャスアカウント名を入力してください。');
+            document.getElementById('like_voter_id_input')?.focus();
+            return;
+        }
+        setIsLiking(songTitle);
+        await logRequest(songTitle, likeVoterId);
+        await refreshRankings();
+        setIsLiking(null);
+        showLikeMessage(`「${songTitle}」にいいねしました！`);
+    };
+
     const getMedal = (rank: number) => {
         if (rank === 1) return '🥇';
         if (rank === 2) return '🥈';
@@ -99,10 +178,29 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingL
                 リクエスト
             </h2>
              <p className="text-center text-gray-400 mb-8 text-sm">
-                弾けるようになるかも？リストにない曲はリクエスト！
+                リストにない曲はリクエスト！ランキングにある曲は「いいね」で応援！
             </p>
             
             <RequestForm logRequest={logRequest} refreshRankings={refreshRankings} />
+            <RankingActions logRequest={logRequest} refreshRankings={refreshRankings} />
+
+            <div className="bg-gray-800/50 p-6 rounded-lg mb-8 border border-gray-700">
+                <h3 className="text-xl font-bold text-center mb-4">ランキングの曲に「いいね」して応援！</h3>
+                 <div className="mb-4">
+                    <label htmlFor="like_voter_id_input" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 <span className="text-red-400">*</span></label>
+                    <input
+                        id="like_voter_id_input"
+                        type="text"
+                        value={likeVoterId}
+                        onChange={(e) => setLikeVoterId(e.target.value)}
+                        placeholder="@の後ろのIDを入力"
+                        required
+                        className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
+                    />
+                    <p className="text-xs text-gray-400 text-left mt-1">配信者のみに公開されます。</p>
+                </div>
+                 {likeMessage && <p className="text-center text-green-400 h-6 flex items-center justify-center">{likeMessage}</p>}
+            </div>
 
             <h3 className="text-xl font-bold text-center mb-4">現在のリクエストランキング</h3>
 
@@ -123,7 +221,10 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingL
                                 <div className="flex items-center gap-4 ml-4 flex-shrink-0">
                                     <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
                                     <ActionButton href={printGakufuUrl} title="ぷりんと楽譜で検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
-                                    <div className="text-lg font-semibold text-pink-400 hidden sm:block">{item.count}票</div>
+                                     <button onClick={() => handleLike(item.id)} disabled={isLiking === item.id} className="p-2 rounded-full hover:bg-pink-500/20 disabled:cursor-not-allowed" title="いいね！">
+                                        {isLiking === item.id ? <LoadingSpinner className="w-5 h-5 text-pink-400" /> : <HeartIcon className="w-5 h-5 text-pink-400" />}
+                                    </button>
+                                    <div className="text-lg font-semibold text-pink-400 w-12 text-right">{item.count}票</div>
                                 </div>
                             </div>
                         )

@@ -1,4 +1,3 @@
-// This is a new file.
 import React, { useState } from 'react';
 import { XIcon, ExternalLinkIcon, CheckCircleIcon, CloudUploadIcon } from '../../components/ui/Icons';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -18,6 +17,10 @@ export const RequestSongModal: React.FC<RequestSongModalProps> = ({ isOpen, onCl
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!casId.trim()) {
+            alert('ツイキャスアカウント名を入力してください。');
+            return;
+        }
         setIsSending(true);
         await logRequest(songTitle, casId);
         setIsSending(false);
@@ -51,15 +54,19 @@ export const RequestSongModal: React.FC<RequestSongModalProps> = ({ isOpen, onCl
                 ) : (
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
-                            <label htmlFor="casId" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 (任意)</label>
+                            <label htmlFor="casId_modal" className="block text-sm text-left font-medium text-gray-300 mb-1">
+                                ツイキャスアカウント名 <span className="text-red-400">*</span>
+                            </label>
                             <input
-                                id="casId"
+                                id="casId_modal"
                                 type="text"
                                 value={casId}
                                 onChange={(e) => setCasId(e.target.value)}
                                 placeholder="@の後ろのIDを入力"
+                                required
                                 className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
                             />
+                            <p className="text-xs text-gray-400 text-left mt-1">配信者のみに公開されます。</p>
                         </div>
                         
                         <div className="text-xs text-left text-gray-400 bg-gray-900 p-3 rounded-md space-y-2 mb-6">
