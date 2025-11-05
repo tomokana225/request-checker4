@@ -15,11 +15,9 @@ interface SearchViewProps {
     setIsAdminModalOpen: (isOpen: boolean) => void;
 }
 
-const SEARCH_DEBOUNCE_MS = 300;
 const MAX_RELATED_SONGS = 5;
 
 export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logRequest, refreshRankings, searchTerm, setSearchTerm, setIsAdminModalOpen }) => {
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [suggestions, setSuggestions] = useState<Song[]>([]);
@@ -27,18 +25,9 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
     const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
     const [likeMessage, setLikeMessage] = useState('');
     const searchContainerRef = useRef<HTMLDivElement>(null);
+    const initialSearchTermRef = useRef(searchTerm);
 
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-        }, SEARCH_DEBOUNCE_MS);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [searchTerm]);
-    
     const normalizedSongs = useMemo(() => {
         return songs.map(song => ({
             original: song,
@@ -49,6 +38,12 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
 
     // Update suggestions based on search term
     useEffect(() => {
+        // Don't show suggestions if a search has been executed and the term hasn't changed
+        if (searchResult && normalizeForSearch(searchTerm) === normalizeForSearch(searchResult.searchTerm)) {
+            setSuggestions([]);
+            return;
+        }
+
         if (searchTerm.trim().length > 1) {
             const normalizedTerm = normalizeForSearch(searchTerm);
             const filteredSuggestions = normalizedSongs
@@ -62,7 +57,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
         } else {
             setSuggestions([]);
         }
-    }, [searchTerm, normalizedSongs]);
+    }, [searchTerm, normalizedSongs, searchResult]);
 
     const performSearch = useCallback((term: string) => {
         if (term.trim().toLowerCase() === 'admin') {
@@ -117,14 +112,14 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
         }
 
     }, [logSearch, normalizedSongs, setIsAdminModalOpen, setSearchTerm]);
-
+    
     useEffect(() => {
-        if (debouncedSearchTerm.trim()) {
-             performSearch(debouncedSearchTerm);
-        } else {
-            setSearchResult(null);
+        // If the view is loaded with a pre-existing search term (e.g., from the suggest modal),
+        // perform the search immediately on mount. This only runs once.
+        if (initialSearchTermRef.current.trim()) {
+            performSearch(initialSearchTermRef.current);
         }
-    }, [debouncedSearchTerm, performSearch]);
+    }, [performSearch]);
 
     // Close suggestions when clicking outside
     useEffect(() => {
@@ -234,7 +229,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
                             autoComplete="off"
                         />
                         {searchTerm && (
-                            <button type="button" onClick={() => setSearchTerm('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                            <button type="button" onClick={() => { setSearchTerm(''); setSearchResult(null); }} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
                                 <XIcon className="w-6 h-6" />
                             </button>
                         )}

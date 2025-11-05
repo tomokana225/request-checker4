@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApi } from './hooks/useApi';
+// FIX: Import `UiConfig` to resolve 'Cannot find name' error.
 import { Mode, UiConfig } from './types';
 
 import { SearchView } from './views/SearchView';
@@ -94,9 +95,6 @@ const App: React.FC = () => {
     };
 
     const renderView = () => {
-        if (isLoading) return <div className="flex justify-center items-center mt-20"><LoadingSpinner className="w-12 h-12" /></div>;
-        if (error) return <p className="text-center text-red-400 mt-20">Error: {error}</p>;
-
         switch (mode) {
             case 'search':
                 return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
@@ -129,6 +127,25 @@ const App: React.FC = () => {
     };
     
     const hasSupportLinks = uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl;
+
+    if (isLoading) {
+        return (
+            <div className="bg-[#111827] min-h-screen flex flex-col justify-center items-center text-white font-sans">
+                <LoadingSpinner className="w-12 h-12 text-cyan-400" />
+                <p className="mt-4 text-lg text-gray-300">読み込み中...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-[#111827] min-h-screen flex flex-col justify-center items-center text-white font-sans p-4">
+                <h2 className="text-2xl font-bold text-red-400 mb-4">エラーが発生しました</h2>
+                <p className="text-gray-300 text-center">データの読み込みに失敗しました。時間をおいてページを再読み込みしてください。</p>
+                <p className="mt-2 text-xs text-gray-500 text-center">詳細: {error}</p>
+            </div>
+        );
+    }
 
     return (
         <div style={backgroundStyle} className="min-h-screen text-white font-sans transition-colors duration-500">

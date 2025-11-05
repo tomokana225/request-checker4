@@ -100,8 +100,20 @@ export async function onRequest(context) {
                 case 'getUiConfig': {
                     const docRef = doc(db, 'settings/ui');
                     const docSnap = await getDoc(docRef);
-                    const data = docSnap.exists() ? { ...DEFAULT_UI_CONFIG, ...docSnap.data() } : DEFAULT_UI_CONFIG;
-                    return jsonResponse(data);
+                    if (docSnap.exists()) {
+                        const storedConfig = docSnap.data();
+                        // Deep merge navButtons to ensure new buttons added in code are not missing from the config
+                        const mergedData = {
+                            ...DEFAULT_UI_CONFIG,
+                            ...storedConfig,
+                            navButtons: {
+                                ...DEFAULT_UI_CONFIG.navButtons,
+                                ...(storedConfig.navButtons || {})
+                            }
+                        };
+                        return jsonResponse(mergedData);
+                    }
+                    return jsonResponse(DEFAULT_UI_CONFIG);
                 }
                 case 'getBlogPosts': {
                     const postsRef = collection(db, 'blogPosts');
