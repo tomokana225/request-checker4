@@ -97,14 +97,29 @@ function App() {
     }
   }
 
+  const appStyle = {
+    '--primary-color': uiConfig.primaryColor,
+    backgroundColor: uiConfig.backgroundType === 'color' ? uiConfig.backgroundColor : '#111827'
+  } as React.CSSProperties;
+
+
   return (
-    <div className="bg-gray-900 text-white min-h-screen flex flex-col" style={{'--primary-color': uiConfig.primaryColor} as React.CSSProperties}>
+    <div className="text-white min-h-screen flex flex-col" style={appStyle}>
         {connectionStatus !== 'connected' && (
             <div className={`fixed top-0 left-0 right-0 p-2 text-center text-sm z-50 transition-all duration-300 ${connectionStatus === 'connecting' ? 'bg-blue-600 text-white' : 'bg-yellow-600 text-black'}`}>
                 {connectionStatus === 'connecting' ? 'サーバーに接続中...' : 'サーバーに接続できませんでした。オフラインモードで表示しています。'}
             </div>
         )}
-      <div className="absolute top-0 left-0 w-full h-full bg-cover bg-center opacity-10" style={{backgroundImage: "url('https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070&auto=format&fit=crop')"}}></div>
+        
+        {uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl && (
+            <div 
+              className="absolute top-0 left-0 w-full h-full bg-cover bg-center"
+              style={{
+                backgroundImage: `url(${uiConfig.backgroundImageUrl})`,
+                opacity: uiConfig.backgroundOpacity,
+              }}
+            ></div>
+        )}
       
       <div className="relative z-10 flex-grow container mx-auto px-4 pt-20 pb-24 md:pt-24">
         <header className="text-center mb-8">

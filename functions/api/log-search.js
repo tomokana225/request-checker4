@@ -61,7 +61,7 @@ const normalizeForSearch = (str) => {
   if (!str) return '';
   const halfWidth = str.replace(/[\uff01-\uff5e]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0));
   const katakana = hiraToKata(halfWidth);
-  return katakana.toLowerCase().replace(/[\s'’"”.,!&ー]+/g, '');
+  return katakana.toLowerCase().replace(/[\s'’"”.,!&ー()]+/g, '');
 };
 
 

@@ -22,12 +22,12 @@ const hiraToKata = (str: string): string => {
  * 1. Converts full-width characters to half-width.
  * 2. Converts to lowercase.
  * 3. Converts Hiragana to Katakana.
- * 4. Removes all whitespace and common punctuation.
+ * 4. Removes all whitespace and common punctuation, including parentheses.
  */
 export const normalizeForSearch = (str: string): string => {
   if (!str) return '';
   const halfWidth = toHalfWidth(str);
   const katakana = hiraToKata(halfWidth);
   // Remove spaces and some punctuation that might differ between user input and data
-  return katakana.toLowerCase().replace(/[\s'’"”.,!&ー]+/g, '');
+  return katakana.toLowerCase().replace(/[\s'’"”.,!&ー()]+/g, '');
 };

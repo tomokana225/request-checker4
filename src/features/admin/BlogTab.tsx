@@ -26,7 +26,7 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
             const updatedPost = posts.find(p => p.id === selectedPost.id);
             if (updatedPost) {
                 // Keep local changes if they exist (e.g., a selected image file)
-                setSelectedPost(prev => ({...updatedPost, ...prev, id: updatedPost.id}));
+                setSelectedPost(prev => ({...prev, ...updatedPost}));
             } else {
                 setSelectedPost(null);
             }
@@ -83,48 +83,44 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
         setSaveStatus('idle');
 
         let postToSave = { ...selectedPost };
+        const originalPost = posts.find(p => p.id === postToSave.id);
+        const oldImageUrl = originalPost?.imageUrl;
 
         try {
             // 1. Handle image upload if a new file is selected
             if (postToSave.imageFile) {
-                 // Delete old image if it exists and we're replacing it.
-                const originalPost = posts.find(p => p.id === postToSave.id);
-                if (originalPost?.imageUrl) {
-                    try {
-                        const oldImageRef = ref(storage, originalPost.imageUrl);
-                        await deleteObject(oldImageRef);
-                    } catch (e) {
-                        console.warn("Old image deletion failed, might not exist:", e);
-                    }
-                }
-                
                 const imageRef = ref(storage, `blog_images/${postToSave.id || Date.now()}/${postToSave.imageFile.name}`);
                 await uploadBytes(imageRef, postToSave.imageFile);
                 postToSave.imageUrl = await getDownloadURL(imageRef);
-            } 
-            // 2. Handle image removal if no file is selected and the URL has been cleared
-            else if (!postToSave.imageUrl) {
-                const originalPost = posts.find(p => p.id === postToSave.id);
-                if (originalPost?.imageUrl) {
-                     try {
-                        const oldImageRef = ref(storage, originalPost.imageUrl);
-                        await deleteObject(oldImageRef);
-                    } catch (e) {
-                        console.warn("Old image deletion failed:", e);
-                    }
-                }
             }
-            
-            // 3. Clean up client-side properties before saving to Firestore
+
+            // 2. Clean up client-side properties before saving to Firestore
             delete postToSave.imageFile;
             delete postToSave.isUploading;
 
-            // 4. Save post metadata to Firestore
+            // 3. Save post metadata to Firestore
             const success = await onSavePost(postToSave);
-            setSaveStatus(success ? 'success' : 'error');
-            if (success && !selectedPost.id) {
+            if (!success) {
+                throw new Error("Failed to save post data to Firestore.");
+            }
+            
+            // 4. Handle old image deletion *after* successful save
+            const newImageUrl = postToSave.imageUrl;
+            if (oldImageUrl && oldImageUrl !== newImageUrl) {
+                // This happens if image was replaced or removed
+                try {
+                    const oldImageRef = ref(storage, oldImageUrl);
+                    await deleteObject(oldImageRef);
+                } catch (e) {
+                    console.warn("Old image deletion failed, but post was saved. URL:", oldImageUrl, e);
+                }
+            }
+
+            setSaveStatus('success');
+            if (!selectedPost.id) {
                 setSelectedPost(null); // Clear form after new post creation
             }
+
         } catch (error) {
             console.error("Save process failed:", error);
             setSaveStatus('error');
@@ -133,6 +129,7 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
             setTimeout(() => setSaveStatus('idle'), 3000);
         }
     };
+
 
     const handleDelete = async () => {
         if (!selectedPost || !selectedPost.id) return;

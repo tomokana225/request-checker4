@@ -54,6 +54,10 @@ export interface UiConfig {
     ofuseUrl?: string;
     doneruUrl?: string;
     amazonWishlistUrl?: string;
+    backgroundType: 'color' | 'image';
+    backgroundColor: string;
+    backgroundImageUrl: string;
+    backgroundOpacity: number;
     navButtons: {
         search: NavButtonConfig;
         list: NavButtonConfig;
