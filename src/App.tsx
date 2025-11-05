@@ -38,7 +38,9 @@ const App: React.FC = () => {
         uiConfig,
         setlistSuggestions,
         isLoading, 
-        error, 
+        error,
+        rankingPeriod,
+        setRankingPeriod,
         onSaveSongs,
         onSaveUiConfig,
         onSavePost,
@@ -54,7 +56,6 @@ const App: React.FC = () => {
     const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
-    const [initialRequester, setInitialRequester] = useState('');
 
     useEffect(() => {
         if(uiConfig.primaryColor) {
@@ -89,11 +90,6 @@ const App: React.FC = () => {
         setIsSuggestModalOpen(false);
     };
 
-    const handleSetlistRequestStart = (requester: string) => {
-        setInitialRequester(requester);
-        setMode('setlist');
-    };
-
     const renderView = () => {
         switch (mode) {
             case 'search':
@@ -101,13 +97,13 @@ const App: React.FC = () => {
             case 'list':
                 return <ListView songs={songs} />;
             case 'ranking':
-                return <RankingView songRankingList={songRankingList} artistRankingList={artistRankingList} />;
+                return <RankingView songRankingList={songRankingList} artistRankingList={artistRankingList} requestRankingList={requestRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
-                return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings} onSetlistRequestStart={handleSetlistRequestStart} />;
+                return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings} />;
             case 'blog':
                 return <BlogView posts={posts} />;
             case 'setlist':
-                return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} initialRequester={initialRequester} />;
+                return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={() => setMode('search')} />;
             default:
                 return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
         }
@@ -123,7 +119,7 @@ const App: React.FC = () => {
     ];
 
     const backgroundStyle: React.CSSProperties = {
-        backgroundColor: uiConfig.backgroundType === 'color' ? uiConfig.backgroundColor : '#111827',
+        backgroundColor: uiConfig.backgroundType === 'color' ? uiConfig.backgroundColor : 'transparent',
     };
     
     const hasSupportLinks = uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl;
@@ -188,7 +184,7 @@ const App: React.FC = () => {
                    {navButtonsConfig.filter(b => uiConfig.navButtons[b.config]?.enabled).map(button => (
                         <NavButton 
                             key={button.mode}
-                            onClick={() => { setMode(button.mode); if (button.mode !== 'search') setSearchTerm(''); if (button.mode !== 'setlist') setInitialRequester(''); }}
+                            onClick={() => { setMode(button.mode); if (button.mode !== 'search') setSearchTerm(''); }}
                             isActive={mode === button.mode}
                             IconComponent={button.icon}
                             label={uiConfig.navButtons[button.config]?.label}

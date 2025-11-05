@@ -2,8 +2,8 @@
 // It logs search terms to Firestore to build a popularity ranking.
 
 import { initializeApp, getApps } from 'firebase/app';
-// Use the "lite" version of Firestore for serverless environments to avoid timeouts
-import { getFirestore, doc, getDoc, setDoc, writeBatch } from 'firebase/firestore/lite';
+// Use the full Firestore SDK to get access to advanced features like `increment`
+import { getFirestore, doc, getDoc, writeBatch, increment } from 'firebase/firestore';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -15,7 +15,6 @@ async function getFirebaseApp(env) {
     if (getApps().length) {
         return getApps()[0];
     }
-    // Securely construct the Firebase config from environment variables (secrets)
     const firebaseConfig = {
         apiKey: env.FIREBASE_API_KEY,
         authDomain: env.FIREBASE_AUTH_DOMAIN,
@@ -103,8 +102,6 @@ export async function onRequest(context) {
         }
         
         const songs = parseSongs(docSnap.data().list);
-
-        // --- New Scoring Logic ---
         let bestMatch = null;
         let highestScore = -1;
 
@@ -133,11 +130,24 @@ export async function onRequest(context) {
             return new Response(JSON.stringify({ success: true, message: "No matching songs" }), { status: 200, headers: successHeaders });
         }
         
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = (now.getMonth() + 1).toString().padStart(2, '0');
+        const safeKey = bestMatch.title.replace(/\./g, '_'); // Firestore field paths cannot contain '.'
+
         const batch = writeBatch(db);
+        
+        // 1. Update all-time ranking
         const countRef = doc(db, 'songSearchCounts', bestMatch.title);
-        const countDocSnap = await getDoc(countRef);
-        const newCount = (countDocSnap.exists() ? countDocSnap.data().count : 0) + 1;
-        batch.set(countRef, { count: newCount, artist: bestMatch.artist }, { merge: true });
+        batch.set(countRef, { count: increment(1), artist: bestMatch.artist }, { merge: true });
+
+        // 2. Update monthly ranking
+        const monthlyRef = doc(db, 'monthlySearchCounts', `${yyyy}-${mm}`);
+        batch.set(monthlyRef, { [safeKey]: { count: increment(1), artist: bestMatch.artist } }, { merge: true });
+
+        // 3. Update yearly ranking
+        const yearlyRef = doc(db, 'yearlySearchCounts', `${yyyy}`);
+        batch.set(yearlyRef, { [safeKey]: { count: increment(1), artist: bestMatch.artist } }, { merge: true });
         
         await batch.commit();
 

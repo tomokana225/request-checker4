@@ -2,7 +2,7 @@
 // It logs song requests to Firestore.
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc, setDoc, writeBatch } from 'firebase/firestore/lite';
+import { getFirestore, doc, getDoc, writeBatch, increment } from 'firebase/firestore';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -58,28 +58,38 @@ export async function onRequest(context) {
     const db = getFirestore(app);
 
     try {
-        const { term, requester } = await request.json();
+        const { term, artist, requester } = await request.json();
 
         if (!term || typeof term !== 'string' || term.trim().length === 0) {
             return jsonResponse({ error: "Invalid song title provided." }, 400);
         }
         
         const songTitle = term.trim();
+        const safeKey = songTitle.replace(/\./g, '_');
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = (now.getMonth() + 1).toString().padStart(2, '0');
 
         const batch = writeBatch(db);
+        
+        // 1. Update all-time request count
         const requestRef = doc(db, 'songRequests', songTitle);
-        const requestDocSnap = await getDoc(requestRef);
-        
-        const newCount = (requestDocSnap.exists() ? requestDocSnap.data().count : 0) + 1;
-        
         const dataToSet = { 
-            count: newCount, 
+            count: increment(1),
+            artist: artist || '',
             lastRequester: requester || 'anonymous',
             lastRequestedAt: Date.now()
         };
-
         batch.set(requestRef, dataToSet, { merge: true });
         
+        // 2. Update monthly request count
+        const monthlyRef = doc(db, 'monthlyRequestCounts', `${yyyy}-${mm}`);
+        batch.set(monthlyRef, { [safeKey]: { count: increment(1), artist: artist || '' } }, { merge: true });
+
+        // 3. Update yearly request count
+        const yearlyRef = doc(db, 'yearlyRequestCounts', `${yyyy}`);
+        batch.set(yearlyRef, { [safeKey]: { count: increment(1), artist: artist || '' } }, { merge: true });
+
         await batch.commit();
 
         return jsonResponse({ success: true });

@@ -8,7 +8,7 @@ import { RequestSongModal } from '../features/suggest/RequestSongModal';
 interface SearchViewProps {
     songs: Song[];
     logSearch: (term: string) => void;
-    logRequest: (term: string, requester: string) => Promise<void>;
+    logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     refreshRankings: () => void;
     searchTerm: string;
     setSearchTerm: (term: string) => void;
@@ -137,15 +137,15 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
         setTimeout(() => setLikeMessage(''), 3000);
     };
 
-    const handleLike = async (songTitle: string) => {
-        if (likedSongs.has(songTitle)) return; // Already liked this session
+    const handleLike = async (song: Song) => {
+        if (likedSongs.has(song.title)) return; // Already liked this session
 
-        setIsLiking(songTitle);
-        await logRequest(songTitle, ''); // Log anonymously
-        setLikedSongs(prev => new Set(prev).add(songTitle));
+        setIsLiking(song.title);
+        await logRequest(song.title, song.artist, ''); // Log anonymously with artist
+        setLikedSongs(prev => new Set(prev).add(song.title));
         await refreshRankings();
         setIsLiking(null);
-        showLikeMessage(`「${songTitle}」にいいねしました！`);
+        showLikeMessage(`「${song.title}」にいいねしました！`);
     };
 
     const handleRequestSuccess = () => {

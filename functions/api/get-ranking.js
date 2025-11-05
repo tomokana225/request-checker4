@@ -2,8 +2,8 @@
 // It retrieves the search ranking data from Firestore.
 
 import { initializeApp, getApps } from 'firebase/app';
-// Use the "lite" version of Firestore for serverless environments to avoid timeouts
-import { getFirestore, collection, getDocs, query, orderBy, limit } from 'firebase/firestore/lite';
+// Use the "lite" version of Firestore for serverless environments to keep it fast
+import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore/lite';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -32,6 +32,29 @@ async function getFirebaseApp(env) {
     return initializeApp(firebaseConfig);
 }
 
+const processRankingData = (songData) => {
+    const songRanking = Object.entries(songData)
+        .map(([title, details]) => ({
+            id: title.replace(/_/g, '.'), // Restore original title
+            ...details
+        }))
+        .sort((a, b) => b.count - a.count);
+
+    const artistCounts = new Map();
+    songRanking.forEach(song => {
+        if (song.artist) {
+            artistCounts.set(song.artist, (artistCounts.get(song.artist) || 0) + song.count);
+        }
+    });
+    
+    const artistRanking = Array.from(artistCounts, ([artist, count]) => ({ id: artist, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 50);
+
+    return { songRanking, artistRanking };
+};
+
+
 export async function onRequest(context) {
     const { request, env } = context;
 
@@ -55,37 +78,51 @@ export async function onRequest(context) {
     }
 
     const db = getFirestore(app);
+    const url = new URL(request.url);
+    const period = url.searchParams.get('period') || 'all'; // 'all', 'month', 'year'
 
     try {
-        const countsRef = collection(db, 'songSearchCounts');
-        const q = query(countsRef, orderBy('count', 'desc'), limit(100));
-        const querySnapshot = await getDocs(q);
+        let responsePayload = { songRanking: [], artistRanking: [] };
 
-        const songRanking = [];
-        querySnapshot.forEach((doc) => {
-            songRanking.push({
-                id: doc.id,
-                ...doc.data()
+        if (period === 'all') {
+            const countsRef = collection(db, 'songSearchCounts');
+            const q = query(countsRef, orderBy('count', 'desc'), limit(100));
+            const querySnapshot = await getDocs(q);
+            const songRanking = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            const artistCounts = new Map();
+            songRanking.forEach(song => {
+                if (song.artist) {
+                    artistCounts.set(song.artist, (artistCounts.get(song.artist) || 0) + song.count);
+                }
             });
-        });
+            const artistRanking = Array.from(artistCounts, ([artist, count]) => ({ id: artist, count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 50);
+            responsePayload = { songRanking, artistRanking };
 
-        // Aggregate artist counts
-        const artistCounts = new Map();
-        songRanking.forEach(song => {
-            if (song.artist) {
-                artistCounts.set(song.artist, (artistCounts.get(song.artist) || 0) + song.count);
+        } else {
+            const now = new Date();
+            let docId;
+            let collectionName;
+            if (period === 'month') {
+                const yyyy = now.getFullYear();
+                const mm = (now.getMonth() + 1).toString().padStart(2, '0');
+                docId = `${yyyy}-${mm}`;
+                collectionName = 'monthlySearchCounts';
+            } else { // year
+                docId = `${now.getFullYear()}`;
+                collectionName = 'yearlySearchCounts';
             }
-        });
+            
+            const docRef = doc(db, collectionName, docId);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                responsePayload = processRankingData(docSnap.data());
+            }
+        }
         
-        const artistRanking = Array.from(artistCounts, ([artist, count]) => ({ id: artist, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 50); // Limit to top 50 artists
-
-        const responsePayload = {
-            songRanking,
-            artistRanking
-        };
-
         return new Response(JSON.stringify(responsePayload), { 
             headers: { 
                 'Content-Type': 'application/json',
@@ -93,6 +130,7 @@ export async function onRequest(context) {
                 ...CORS_HEADERS
             } 
         });
+
     } catch (error) {
         console.warn('Get ranking failed:', error);
         return new Response(JSON.stringify({ error: 'Failed to fetch rankings.' }), {

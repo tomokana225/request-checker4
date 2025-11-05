@@ -5,7 +5,7 @@ import { LoadingSpinner } from './LoadingSpinner';
 
 interface SongCardProps {
     song: Song;
-    onLike?: (songTitle: string) => void;
+    onLike?: (song: Song) => void;
     isLiking?: boolean;
     isLiked?: boolean;
 }
@@ -35,7 +35,7 @@ export const SongCard: React.FC<SongCardProps> = ({ song, onLike, isLiking, isLi
                 <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
                 <ActionButton href={lyricsSearchUrl} title="歌詞を検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
                  {onLike && (
-                    <button onClick={() => onLike(song.title)} disabled={isLiking || isLiked} className="p-2 rounded-full hover:bg-pink-500/20 disabled:cursor-not-allowed" title={isLiked ? "いいね済み" : "いいね！"}>
+                    <button onClick={() => onLike(song)} disabled={isLiking || isLiked} className="p-2 rounded-full hover:bg-pink-500/20 disabled:cursor-not-allowed" title={isLiked ? "いいね済み" : "いいね！"}>
                         {isLiking ? (
                             <LoadingSpinner className="w-5 h-5 text-pink-400" />
                         ) : isLiked ? (

@@ -6,13 +6,12 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 interface RequestRankingViewProps {
     rankingList: RequestRankingItem[];
-    logRequest: (term: string, requester: string) => Promise<void>;
+    logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     refreshRankings: () => void;
-    onSetlistRequestStart: (requester: string) => void;
 }
 
 const RequestForm: React.FC<{
-    logRequest: (term: string, requester: string) => Promise<void>;
+    logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     refreshRankings: () => void;
 }> = ({ logRequest, refreshRankings }) => {
     const [songTitle, setSongTitle] = useState('');
@@ -27,7 +26,7 @@ const RequestForm: React.FC<{
             return;
         }
         setIsSending(true);
-        await logRequest(songTitle, casId);
+        await logRequest(songTitle, '', casId);
         setIsSending(false);
         setSentMessage(`「${songTitle}」をリクエストしました！`);
         setSongTitle('');
@@ -59,7 +58,7 @@ const RequestForm: React.FC<{
                         type="text"
                         value={casId}
                         onChange={(e) => setCasId(e.target.value)}
-                        placeholder="@の後ろのIDを入力"
+                        placeholder="IDかアカウント名を入力"
                         required
                         className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
                     />
@@ -83,44 +82,7 @@ const RequestForm: React.FC<{
 };
 
 
-const SuggestSetlistAction: React.FC<{
-    onSetlistRequestStart: (requester: string) => void;
-}> = ({ onSetlistRequestStart }) => {
-    const [voterId, setVoterId] = useState('');
-    
-    const handleStart = () => {
-        if (!voterId.trim()) {
-            alert('提案するには、まずツイキャスアカウント名を入力してください。');
-            return;
-        }
-        onSetlistRequestStart(voterId);
-    };
-
-    return(
-        <div className="bg-gray-800/50 p-6 rounded-lg mb-8 border border-gray-700">
-            <h3 className="text-xl font-bold text-center mb-2">セトリを提案する</h3>
-            <p className="text-center text-gray-400 mb-4 text-sm">次の配信で演奏してほしい曲のセットリスト（最大5曲）を提案できます。</p>
-            <div className="mb-4">
-                <label htmlFor="voterId_input" className="block text-sm text-left font-medium text-gray-300 mb-1">ツイキャスアカウント名 <span className="text-red-400">*</span></label>
-                <input
-                    id="voterId_input"
-                    type="text"
-                    value={voterId}
-                    onChange={(e) => setVoterId(e.target.value)}
-                    placeholder="@の後ろのIDを入力"
-                    required
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
-                />
-            </div>
-            <button onClick={handleStart} className="w-full h-12 flex items-center justify-center gap-2 px-6 py-3 bg-teal-600 hover:bg-teal-700 rounded-lg font-semibold transition-transform transform hover:scale-105">
-                曲を選んでセトリを提案
-            </button>
-        </div>
-    );
-};
-
-
-export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingList, logRequest, refreshRankings, onSetlistRequestStart }) => {
+export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingList, logRequest, refreshRankings }) => {
 
     const getMedal = (rank: number) => {
         if (rank === 1) return '🥇';
@@ -142,11 +104,10 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingL
                 リクエスト
             </h2>
              <p className="text-center text-gray-400 mb-8 text-sm">
-                リストにない曲はリクエスト！セットリストの提案もこちらから！
+                リストにない曲はこちらからリクエストできます。
             </p>
             
             <RequestForm logRequest={logRequest} refreshRankings={refreshRankings} />
-            <SuggestSetlistAction onSetlistRequestStart={onSetlistRequestStart} />
             
             <h3 className="text-xl font-bold text-center my-8">現在のリクエストランキング</h3>
 

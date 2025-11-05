@@ -27,6 +27,7 @@ export interface ArtistRankingItem {
 export interface RequestRankingItem {
     id: string; // requested song title
     count: number;
+    artist?: string;
 }
 
 export interface BlogPost {
@@ -74,3 +75,5 @@ export interface UiConfig {
 }
 
 export type Mode = 'search' | 'list' | 'ranking' | 'requests' | 'blog' | 'setlist';
+
+export type RankingPeriod = 'all' | 'month' | 'year';

@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { RankingItem, ArtistRankingItem } from '../types';
+import { RankingItem, ArtistRankingItem, RequestRankingItem, RankingPeriod } from '../types';
 import { TrendingUpIcon, YouTubeIcon, DocumentTextIcon } from '../components/ui/Icons';
 
 interface RankingViewProps {
     songRankingList: RankingItem[];
     artistRankingList: ArtistRankingItem[];
+    requestRankingList: RequestRankingItem[];
+    period: RankingPeriod;
+    setPeriod: (period: RankingPeriod) => void;
 }
 
-type RankingTab = 'song' | 'artist';
+type RankingTab = 'song' | 'artist' | 'likes';
 
-export const RankingView: React.FC<RankingViewProps> = ({ songRankingList, artistRankingList }) => {
+export const RankingView: React.FC<RankingViewProps> = ({ songRankingList, artistRankingList, requestRankingList, period, setPeriod }) => {
     const [activeTab, setActiveTab] = useState<RankingTab>('song');
 
     const getMedal = (rank: number) => {
@@ -35,9 +38,18 @@ export const RankingView: React.FC<RankingViewProps> = ({ songRankingList, artis
         </button>
     );
 
+    const PeriodButton: React.FC<{ p: RankingPeriod, label: string }> = ({ p, label }) => (
+        <button
+            onClick={() => setPeriod(p)}
+            className={`px-3 py-1 text-xs rounded-md ${period === p ? 'bg-gray-200 text-gray-900 font-bold' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'}`}
+        >
+            {label}
+        </button>
+    );
+
     const renderSongRanking = () => (
         <div className="space-y-3">
-            {songRankingList.map((item, index) => {
+            {songRankingList.slice(0, 10).map((item, index) => {
                 const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.artist} ${item.id}`)}`;
                 const lyricsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${item.artist} ${item.id} 歌詞`)}`;
                 return (
@@ -62,7 +74,7 @@ export const RankingView: React.FC<RankingViewProps> = ({ songRankingList, artis
 
     const renderArtistRanking = () => (
          <div className="space-y-3">
-            {artistRankingList.map((item, index) => (
+            {artistRankingList.slice(0, 10).map((item, index) => (
                 <div key={item.id} className="bg-gray-800 p-4 rounded-lg flex items-center justify-between shadow-lg">
                     <div className="flex items-center gap-4">
                         <div className="text-2xl w-8 text-center">{getMedal(index + 1)}</div>
@@ -76,17 +88,53 @@ export const RankingView: React.FC<RankingViewProps> = ({ songRankingList, artis
         </div>
     );
 
+    const renderLikesRanking = () => (
+        <div className="space-y-3">
+            {requestRankingList.slice(0, 10).map((item, index) => {
+                const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.artist} ${item.id}`)}`;
+                const lyricsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${item.artist} ${item.id} 歌詞`)}`;
+                return (
+                    <div key={item.id} className="bg-gray-800 p-4 rounded-lg flex items-center justify-between shadow-lg">
+                        <div className="flex items-center gap-4 flex-grow min-w-0">
+                            <div className="text-2xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
+                            <div className="flex-grow min-w-0">
+                                <h3 className="font-bold text-lg text-white truncate">{item.id}</h3>
+                                {item.artist && <p className="text-sm text-gray-400 truncate">{item.artist}</p>}
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 ml-4 flex-shrink-0">
+                            <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
+                            <ActionButton href={lyricsSearchUrl} title="歌詞を検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
+                            <div className="text-lg font-semibold text-pink-400 hidden sm:block">{item.count} いいね</div>
+                        </div>
+                    </div>
+                )
+            })}
+        </div>
+    );
+
+
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
-            <h2 className="text-3xl font-bold text-center mb-4 flex items-center justify-center gap-3"><TrendingUpIcon className="w-8 h-8"/>検索人気ランキング</h2>
-
-            <div className="grid grid-cols-2 gap-4 mb-6">
-                <TabButton tab="song" label="曲別" />
-                <TabButton tab="artist" label="アーティスト別" />
+            <div className="flex justify-center items-center mb-4">
+                <h2 className="text-3xl font-bold text-center flex items-center justify-center gap-3"><TrendingUpIcon className="w-8 h-8"/>人気曲ランキング</h2>
+            </div>
+             <div className="flex justify-between items-center mb-6">
+                <div className="grid grid-cols-3 gap-4 flex-grow">
+                    <TabButton tab="song" label="検索数" />
+                    <TabButton tab="artist" label="アーティスト別" />
+                    <TabButton tab="likes" label="いいね数" />
+                </div>
+                <div className="flex gap-2 ml-4 p-1 bg-gray-700 rounded-lg">
+                    <PeriodButton p="all" label="総合" />
+                    <PeriodButton p="month" label="月間" />
+                    <PeriodButton p="year" label="年間" />
+                </div>
             </div>
 
-            {activeTab === 'song' && (songRankingList.length > 0 ? renderSongRanking() : <p className="text-center text-gray-400 mt-8">ランキングデータを読み込んでいます...</p>)}
-            {activeTab === 'artist' && (artistRankingList.length > 0 ? renderArtistRanking() : <p className="text-center text-gray-400 mt-8">ランキングデータを読み込んでいます...</p>)}
+            {activeTab === 'song' && (songRankingList.length > 0 ? renderSongRanking() : <p className="text-center text-gray-400 mt-8">ランキングデータがありません。</p>)}
+            {activeTab === 'artist' && (artistRankingList.length > 0 ? renderArtistRanking() : <p className="text-center text-gray-400 mt-8">ランキングデータがありません。</p>)}
+            {activeTab === 'likes' && (requestRankingList.length > 0 ? renderLikesRanking() : <p className="text-center text-gray-400 mt-8">いいねされた曲はありません。</p>)}
         </div>
     );
 };

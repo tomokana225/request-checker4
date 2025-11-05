@@ -26,7 +26,7 @@ const DEFAULT_UI_CONFIG = {
         list: { label: '曲リスト', enabled: true },
         ranking: { label: '人気曲', enabled: true },
         requests: { label: 'リクエスト', enabled: true },
-        blog: { label: 'ブログ', enabled: true },
+        blog: { label: 'お知らせ', enabled: true },
         suggest: { label: 'おまかせ選曲', enabled: true },
         setlist: { label: 'セトリ提案', enabled: true },
     }

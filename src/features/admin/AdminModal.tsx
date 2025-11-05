@@ -46,7 +46,7 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
                 <div className="border-b border-gray-700 px-4">
                     <nav className="flex space-x-2">
                         <TabButton tab="songs" label="曲リスト管理" />
-                        <TabButton tab="blog" label="ブログ管理" />
+                        <TabButton tab="blog" label="お知らせ管理" />
                         <TabButton tab="setlists" label="セトリ提案" />
                         <TabButton tab="settings" label="アプリ設定" />
                     </nav>

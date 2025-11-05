@@ -98,7 +98,7 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
             <div className="md:col-span-1 flex flex-col min-h-0">
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">ブログ記事一覧</h3>
+                    <h3 className="text-lg font-semibold">お知らせ一覧</h3>
                     <button onClick={handleNewPost} className="flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300 font-semibold p-2 bg-gray-700 hover:bg-gray-600 rounded-md">
                         <PlusIcon className="w-4 h-4" />
                         新規作成

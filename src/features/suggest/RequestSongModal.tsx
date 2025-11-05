@@ -6,7 +6,7 @@ interface RequestSongModalProps {
     isOpen: boolean;
     onClose: () => void;
     songTitle: string;
-    logRequest: (term: string, requester: string) => Promise<void>;
+    logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     onSuccess: () => void;
 }
 
@@ -22,7 +22,7 @@ export const RequestSongModal: React.FC<RequestSongModalProps> = ({ isOpen, onCl
             return;
         }
         setIsSending(true);
-        await logRequest(songTitle, casId);
+        await logRequest(songTitle, '', casId);
         setIsSending(false);
         setIsSent(true);
         onSuccess();
@@ -62,7 +62,7 @@ export const RequestSongModal: React.FC<RequestSongModalProps> = ({ isOpen, onCl
                                 type="text"
                                 value={casId}
                                 onChange={(e) => setCasId(e.target.value)}
-                                placeholder="@の後ろのIDを入力"
+                                placeholder="IDかアカウント名を入力"
                                 required
                                 className="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-base focus:outline-none focus:ring-2 focus:ring-[var(--primary-color)] transition"
                             />
