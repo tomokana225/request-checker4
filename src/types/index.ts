@@ -65,6 +65,9 @@ export interface UiConfig {
     darkBackgroundColor: string;
     backgroundImageUrl: string;
     backgroundOpacity: number;
+    twitcastingIconUrl?: string;
+    xIconUrl?: string;
+    supportIconUrl?: string;
     navButtons: {
         search: NavButtonConfig;
         list: NavButtonConfig;

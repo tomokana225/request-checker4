@@ -13,6 +13,9 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     darkBackgroundColor: '#111827',
     backgroundImageUrl: '',
     backgroundOpacity: 0.1,
+    twitcastingIconUrl: '',
+    xIconUrl: '',
+    supportIconUrl: '',
     navButtons: {
         search: { label: 'Search', enabled: true },
         list: { label: 'List', enabled: true },

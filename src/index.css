@@ -26,3 +26,26 @@ h1, h2, h3, h4, h5, h6 { font-family: 'Kiwi Maru', serif; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { 
   background: rgba(34, 211, 238, 0.8); 
 }
+
+/* Slot machine animations */
+@keyframes slot-flicker {
+  0% { transform: translateY(-8px); opacity: 0.7; }
+  25% { transform: translateY(0px); opacity: 1; }
+  50% { transform: translateY(8px); opacity: 0.6; }
+  75% { transform: translateY(0px); opacity: 1; }
+  100% { transform: translateY(-8px); opacity: 0.7; }
+}
+
+.animate-slot-flicker {
+  animation: slot-flicker 0.08s linear infinite;
+}
+
+@keyframes slot-result-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  70% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-slot-result-pop {
+  animation: slot-result-pop 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}

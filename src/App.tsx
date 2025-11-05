@@ -88,7 +88,6 @@ const App: React.FC = () => {
             case 'list':
                 return <ListView songs={songs} />;
             case 'ranking':
-                // FIX: Removed unused `requestRanking` and `songs` props from `RankingView` as they are not defined in its props interface.
                 return <RankingView songRanking={songRankingList} artistRanking={artistRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
                 return <RequestRankingView rankingList={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings} />;
@@ -167,29 +166,48 @@ const App: React.FC = () => {
                         </div>
                         <h1 className="text-4xl md:text-5xl font-extrabold" style={{color: 'var(--primary-color)'}}>{uiConfig.mainTitle}</h1>
                         <p className="text-md md:text-lg mt-2 text-gray-600 dark:text-gray-300">{uiConfig.subtitle}</p>
-                        <div className="mt-6 flex flex-wrap justify-center items-center gap-6">
+                        <div className="mt-6 flex flex-wrap justify-center items-center gap-4">
                             {uiConfig.twitcastingUrl && (
-                                <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 group">
-                                    <div className="w-10 h-10 rounded-full bg-cyan-500 group-hover:bg-cyan-600 transition-colors flex items-center justify-center shadow-md">
-                                        <TwitcasIcon className="w-6 h-6 text-white" />
-                                    </div>
-                                    <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-[var(--primary-color)] transition-colors">ツイキャスはこちら</span>
+                                <a 
+                                    href={uiConfig.twitcastingUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="inline-flex items-center justify-center gap-3 px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white font-bold transition-transform transform hover:scale-105 shadow-md"
+                                >
+                                    {uiConfig.twitcastingIconUrl ? (
+                                        <img src={uiConfig.twitcastingIconUrl} alt="Twitcasting" className="w-6 h-6" />
+                                    ) : (
+                                        <TwitcasIcon className="w-6 h-6" />
+                                    )}
+                                    <span>ツイキャスはこちらから</span>
                                 </a>
                             )}
                             {uiConfig.xUrl && (
-                                <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 group">
-                                    <div className="w-10 h-10 rounded-full bg-gray-800 dark:bg-white group-hover:bg-black dark:group-hover:bg-gray-200 transition-colors flex items-center justify-center shadow-md">
-                                        <XSocialIcon className="w-5 h-5 text-white dark:text-black" />
-                                    </div>
-                                    <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-[var(--primary-color)] transition-colors">Xはこちら</span>
+                                <a 
+                                    href={uiConfig.xUrl} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="inline-flex items-center justify-center gap-3 px-4 py-2 rounded-lg bg-gray-800 dark:bg-white hover:bg-black dark:hover:bg-gray-200 text-white dark:text-black font-bold transition-transform transform hover:scale-105 shadow-md"
+                                >
+                                    {uiConfig.xIconUrl ? (
+                                        <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5" />
+                                    ) : (
+                                        <XSocialIcon className="w-5 h-5" />
+                                    )}
+                                    <span>Xはこちらから</span>
                                 </a>
                             )}
                             {(uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl) && (
-                                <button onClick={() => setIsSupportModalOpen(true)} className="inline-flex items-center gap-3 group">
-                                    <div className="w-10 h-10 rounded-full bg-pink-500 group-hover:bg-pink-600 transition-colors flex items-center justify-center shadow-md">
-                                        <HeartIcon className="w-6 h-6 text-white" />
-                                    </div>
-                                    <span className="font-bold text-gray-700 dark:text-gray-200 group-hover:text-[var(--primary-color)] transition-colors">配信者を支援</span>
+                                <button 
+                                    onClick={() => setIsSupportModalOpen(true)} 
+                                    className="inline-flex items-center justify-center gap-3 px-4 py-2 rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-bold transition-transform transform hover:scale-105 shadow-md"
+                                >
+                                     {uiConfig.supportIconUrl ? (
+                                        <img src={uiConfig.supportIconUrl} alt="Support" className="w-6 h-6" />
+                                    ) : (
+                                        <HeartIcon className="w-6 h-6" />
+                                    )}
+                                    <span>配信者を支援</span>
                                 </button>
                             )}
                         </div>

@@ -110,9 +110,17 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ツイキャスURL</label>
                     <input type="text" name="twitcastingUrl" value={config.twitcastingUrl || ''} onChange={handleInputChange} placeholder="https://twitcasting.tv/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
+                 <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ツイキャスアイコンURL</label>
+                    <input type="text" name="twitcastingIconUrl" value={config.twitcastingIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">X (Twitter) URL</label>
                     <input type="text" name="xUrl" value={config.xUrl || ''} onChange={handleInputChange} placeholder="https://x.com/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                </div>
+                 <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">X (Twitter) アイコンURL</label>
+                    <input type="text" name="xIconUrl" value={config.xIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">テーマカラー</label>
@@ -195,6 +203,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                  <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amazon ほしい物リスト URL</label>
                     <input type="text" name="amazonWishlistUrl" value={config.amazonWishlistUrl || ''} onChange={handleInputChange} placeholder="https://www.amazon.jp/hz/wishlist/..." className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                </div>
+                 <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">サポートボタン アイコンURL</label>
+                    <input type="text" name="supportIconUrl" value={config.supportIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
             </div>
 

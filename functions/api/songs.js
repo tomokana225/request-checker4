@@ -23,6 +23,9 @@ const DEFAULT_UI_CONFIG = {
     darkBackgroundColor: '#111827',
     backgroundImageUrl: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070&auto=format&fit=crop',
     backgroundOpacity: 0.1,
+    twitcastingIconUrl: '',
+    xIconUrl: '',
+    supportIconUrl: '',
     navButtons: {
         search: { label: '曲を検索', enabled: true },
         list: { label: '曲リスト', enabled: true },
