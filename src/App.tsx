@@ -110,7 +110,7 @@ const App: React.FC = () => {
             case 'ranking':
                 return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} requestRanking={requestRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
-                return <RequestRankingView logRequest={logRequest} refreshRankings={refreshRankings} />;
+                return <RequestRankingView requestRanking={requestRankingList} logRequest={logRequest} refreshRankings={refreshRankings} />;
             case 'news':
                 return <BlogView posts={posts} />;
             case 'setlist':
