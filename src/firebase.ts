@@ -1,11 +1,9 @@
-// FIX: The Firebase SDK version on the client appears to be v8 or a similar version
-// that does not use modular, named exports from 'firebase/app'. The original v9 syntax
-// `import { initializeApp, getApps } from 'firebase/app'` was causing an error.
-// Switched to the v8 syntax which uses a default `firebase` export.
-import firebase from 'firebase/app';
+// FIX: Switched to a namespace import for Firebase to resolve module export errors.
+// This is a common workaround for build tool configurations that struggle with Firebase's module structure.
+import * as firebase from 'firebase/app';
 
 const initializeFirebase = async () => {
-  if (firebase.apps.length > 0) {
+  if (firebase.getApps().length > 0) {
     // Firebase is already initialized, do nothing.
     return;
   }
