@@ -123,9 +123,13 @@ export async function onRequest(context) {
                 }
                 case 'getBlogPosts': {
                     const postsRef = collection(db, 'blogPosts');
-                    const q = query(postsRef, where('isPublished', '==', true), orderBy('createdAt', 'desc'));
+                    // Query by date first to avoid needing a composite index.
+                    const q = query(postsRef, orderBy('createdAt', 'desc'));
                     const querySnapshot = await getDocs(q);
-                    const posts = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    // Filter for published posts in the function code.
+                    const posts = querySnapshot.docs
+                        .map(d => ({ id: d.id, ...d.data() }))
+                        .filter(post => post.isPublished);
                     return jsonResponse(posts);
                 }
                 case 'getAdminBlogPosts': {

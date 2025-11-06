@@ -57,24 +57,28 @@ export async function onRequest(context) {
 
     try {
         const requestsRef = collection(db, 'songRequests');
-        // Fetch requests that are NOT anonymous likes, and order by most recent.
-        // This query requires a composite index in Firestore.
+        
+        // First, query by the most recent requests. This avoids needing a composite index.
+        // We fetch more items than needed (e.g., 200) to ensure we can find enough non-anonymous requests.
         const q = query(
             requestsRef, 
-            where('lastRequester', '!=', 'anonymous'),
-            orderBy('lastRequester'),
             orderBy('lastRequestedAt', 'desc'),
-            limit(100)
+            limit(200)
         );
         
         const querySnapshot = await getDocs(q);
-        const newRequests = [];
+        const allRecentRequests = [];
         querySnapshot.forEach((doc) => {
-            newRequests.push({
+            allRecentRequests.push({
                 id: doc.id, // This is the song title
                 ...doc.data()
             });
         });
+
+        // Second, filter out anonymous requests in the function's code.
+        const newRequests = allRecentRequests
+            .filter(req => req.lastRequester !== 'anonymous')
+            .slice(0, 100); // Apply the final limit after filtering.
         
         return new Response(JSON.stringify(newRequests), { 
             headers: { 
