@@ -1,8 +1,10 @@
-import { initializeApp, getApps } from 'firebase/app';
+// FIX: Switched to Firebase v8 compat syntax to resolve module export errors.
+// This is often necessary in client-side setups where dependency resolution can be tricky.
+import firebase from 'firebase/compat/app';
 
 const initializeFirebase = async () => {
   // Firebase is already initialized, do nothing.
-  if (getApps().length > 0) {
+  if (firebase.apps.length > 0) {
     return;
   }
   
@@ -16,7 +18,7 @@ const initializeFirebase = async () => {
       console.error("Firebase config is missing API key. Firebase will not be initialized.");
       return;
     }
-    initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
   } catch (error) {
     console.error("Firebase initialization error:", error);
     return;

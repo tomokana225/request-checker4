@@ -120,10 +120,13 @@ const App: React.FC = () => {
         }
     };
 
+    // FIX: Use a specific type for NavButtonKey to avoid potential indexing errors with symbols.
     const navButtons = useMemo(() => {
         if (!uiConfig.navButtons) return [];
         
-        const buttonConfigs: { [key: string]: any } = {
+        type NavButtonKey = keyof typeof uiConfig.navButtons;
+
+        const buttonConfigs: Record<NavButtonKey, any> = {
             search: { mode: 'search', icon: SearchIcon, config: uiConfig.navButtons.search },
             printGakufu: { 
                 href: 'https://www.print-gakufu.com/search/result/score___subscription/', 
@@ -138,7 +141,7 @@ const App: React.FC = () => {
             setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
         };
 
-        const buttonOrder: (keyof typeof uiConfig.navButtons)[] = [
+        const buttonOrder: NavButtonKey[] = [
             'search', 'printGakufu', 'list', 'ranking', 'news', 'requests', 'suggest', 'setlist'
         ];
 

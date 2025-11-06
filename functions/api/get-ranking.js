@@ -2,8 +2,8 @@
 // It retrieves the search ranking data from Firestore.
 
 import { initializeApp, getApps } from 'firebase/app';
-// Use the full version of Firestore to ensure stability
-import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
+// Use the lite version of Firestore for performance in a serverless environment
+import { getFirestore, collection, getDocs, query, orderBy, limit, doc, getDoc } from 'firebase/firestore/lite';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',

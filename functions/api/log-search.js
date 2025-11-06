@@ -2,8 +2,8 @@
 // It logs search terms to Firestore to build a popularity ranking.
 
 import { initializeApp, getApps } from 'firebase/app';
-// Use the full Firestore SDK to get access to advanced features like `increment`
-import { getFirestore, doc, getDoc, writeBatch, increment } from 'firebase/firestore';
+// Use the lite Firestore SDK and transactions for atomic updates
+import { getFirestore, doc, getDoc, runTransaction } from 'firebase/firestore/lite';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -135,21 +135,27 @@ export async function onRequest(context) {
         const mm = (now.getMonth() + 1).toString().padStart(2, '0');
         const safeKey = bestMatch.title.replace(/\./g, '_'); // Firestore field paths cannot contain '.'
 
-        const batch = writeBatch(db);
-        
-        // 1. Update all-time ranking
-        const countRef = doc(db, 'songSearchCounts', bestMatch.title);
-        batch.set(countRef, { count: increment(1), artist: bestMatch.artist }, { merge: true });
+        await runTransaction(db, async (transaction) => {
+            // 1. Update all-time ranking
+            const countRef = doc(db, 'songSearchCounts', bestMatch.title);
+            const countDoc = await transaction.get(countRef);
+            const newAllTimeCount = (countDoc.data()?.count || 0) + 1;
+            transaction.set(countRef, { count: newAllTimeCount, artist: bestMatch.artist }, { merge: true });
 
-        // 2. Update monthly ranking
-        const monthlyRef = doc(db, 'monthlySearchCounts', `${yyyy}-${mm}`);
-        batch.set(monthlyRef, { [safeKey]: { count: increment(1), artist: bestMatch.artist } }, { merge: true });
-
-        // 3. Update yearly ranking
-        const yearlyRef = doc(db, 'yearlySearchCounts', `${yyyy}`);
-        batch.set(yearlyRef, { [safeKey]: { count: increment(1), artist: bestMatch.artist } }, { merge: true });
-        
-        await batch.commit();
+            // 2. Update monthly ranking
+            const monthlyRef = doc(db, 'monthlySearchCounts', `${yyyy}-${mm}`);
+            const monthlyDoc = await transaction.get(monthlyRef);
+            const monthlyData = monthlyDoc.data() || {};
+            const newMonthlyCount = (monthlyData[safeKey]?.count || 0) + 1;
+            transaction.set(monthlyRef, { [safeKey]: { count: newMonthlyCount, artist: bestMatch.artist } }, { merge: true });
+            
+            // 3. Update yearly ranking
+            const yearlyRef = doc(db, 'yearlySearchCounts', `${yyyy}`);
+            const yearlyDoc = await transaction.get(yearlyRef);
+            const yearlyData = yearlyDoc.data() || {};
+            const newYearlyCount = (yearlyData[safeKey]?.count || 0) + 1;
+            transaction.set(yearlyRef, { [safeKey]: { count: newYearlyCount, artist: bestMatch.artist } }, { merge: true });
+        });
 
         return new Response(JSON.stringify({ success: true }), { status: 200, headers: successHeaders });
 
