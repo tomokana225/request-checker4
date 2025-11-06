@@ -1,8 +1,8 @@
 // This serverless function runs on Cloudflare, not in the user's browser.
-// It logs song requests to Firestore.
+// It logs song "likes" to Firestore to build a popularity ranking.
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, doc, getDoc, writeBatch, increment } from 'firebase/firestore';
+import { getFirestore, doc, writeBatch, increment } from 'firebase/firestore';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -31,6 +31,11 @@ async function getFirebaseApp(env) {
     return initializeApp(firebaseConfig);
 }
 
+const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
+});
+
 export async function onRequest(context) {
     const { request, env } = context;
     
@@ -41,24 +46,20 @@ export async function onRequest(context) {
     if (request.method !== 'POST') {
         return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
     }
-
-    const jsonResponse = (data, status = 200) => new Response(JSON.stringify(data), {
-        status,
-        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }
-    });
     
     let app;
     try {
         app = await getFirebaseApp(env);
     } catch (e) {
         console.warn("Firebase Init Failed:", e.message);
-        return jsonResponse({ error: "Server configuration error." }, 500);
+        // Fail silently so it doesn't break user experience
+        return jsonResponse({ success: true, message: "Server config error" });
     }
 
     const db = getFirestore(app);
 
     try {
-        const { term, artist, requester } = await request.json();
+        const { term, artist } = await request.json();
 
         if (!term || typeof term !== 'string' || term.trim().length === 0) {
             return jsonResponse({ error: "Invalid song title provided." }, 400);
@@ -69,27 +70,19 @@ export async function onRequest(context) {
         const now = new Date();
         const yyyy = now.getFullYear();
         const mm = (now.getMonth() + 1).toString().padStart(2, '0');
-        const isAnonymousRequest = !requester || requester.trim() === '';
 
         const batch = writeBatch(db);
         
-        // 1. Update all-time request count
-        const requestRef = doc(db, 'songRequests', songTitle);
-        const dataToSet = { 
-            count: increment(1),
-            artist: artist || '',
-            lastRequester: isAnonymousRequest ? 'anonymous' : requester.trim(),
-            lastRequestedAt: Date.now(),
-            isAnonymous: isAnonymousRequest
-        };
-        batch.set(requestRef, dataToSet, { merge: true });
+        // 1. Update all-time like count
+        const countRef = doc(db, 'songLikeCounts', songTitle);
+        batch.set(countRef, { count: increment(1), artist: artist || '' }, { merge: true });
         
-        // 2. Update monthly request count
-        const monthlyRef = doc(db, 'monthlyRequestCounts', `${yyyy}-${mm}`);
+        // 2. Update monthly like count
+        const monthlyRef = doc(db, 'monthlyLikeCounts', `${yyyy}-${mm}`);
         batch.set(monthlyRef, { [safeKey]: { count: increment(1), artist: artist || '' } }, { merge: true });
 
-        // 3. Update yearly request count
-        const yearlyRef = doc(db, 'yearlyRequestCounts', `${yyyy}`);
+        // 3. Update yearly like count
+        const yearlyRef = doc(db, 'yearlyLikeCounts', `${yyyy}`);
         batch.set(yearlyRef, { [safeKey]: { count: increment(1), artist: artist || '' } }, { merge: true });
 
         await batch.commit();
@@ -97,7 +90,8 @@ export async function onRequest(context) {
         return jsonResponse({ success: true });
 
     } catch (error) {
-        console.warn('Logging request failed:', error);
-        return jsonResponse({ error: 'Failed to log request.' }, 500);
+        console.warn('Logging like failed:', error);
+        // Fail silently
+        return jsonResponse({ success: true, error: "Internal logging error" });
     }
 }

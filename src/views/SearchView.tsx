@@ -8,6 +8,7 @@ import { RequestSongModal } from '../features/suggest/RequestSongModal';
 interface SearchViewProps {
     songs: Song[];
     logSearch: (term: string) => void;
+    logLike: (term: string, artist: string) => Promise<void>;
     logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     refreshRankings: () => void;
     searchTerm: string;
@@ -17,7 +18,7 @@ interface SearchViewProps {
 
 const MAX_RELATED_SONGS = 5;
 
-export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logRequest, refreshRankings, searchTerm, setSearchTerm, setIsAdminModalOpen }) => {
+export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, setIsAdminModalOpen }) => {
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [suggestions, setSuggestions] = useState<Song[]>([]);
@@ -141,7 +142,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logReq
         if (likedSongs.has(song.title)) return; // Already liked this session
 
         setIsLiking(song.title);
-        await logRequest(song.title, song.artist, ''); // Log anonymously with artist
+        await logLike(song.title, song.artist);
         setLikedSongs(prev => new Set(prev).add(song.title));
         await refreshRankings();
         setIsLiking(null);

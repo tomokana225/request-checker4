@@ -5,7 +5,7 @@ import { SongCard } from '../components/ui/SongCard';
 
 interface ListViewProps {
     songs: Song[];
-    logRequest: (term: string, artist: string, requester: string) => Promise<void>;
+    logLike: (term: string, artist: string) => Promise<void>;
     refreshRankings: () => void;
 }
 
@@ -16,7 +16,7 @@ type ViewState =
     { mode: 'by_artist', artist: string } |
     { mode: 'by_genre', genre: string };
 
-export const ListView: React.FC<ListViewProps> = ({ songs, logRequest, refreshRankings }) => {
+export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRankings }) => {
     const [viewState, setViewState] = useState<ViewState>({ mode: 'all' });
     const [isLiking, setIsLiking] = useState<string | null>(null);
     const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
@@ -63,7 +63,7 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logRequest, refreshRa
         if (likedSongs.has(song.title)) return; // Already liked this session
 
         setIsLiking(song.title);
-        await logRequest(song.title, song.artist, ''); // Log anonymously with artist
+        await logLike(song.title, song.artist);
         setLikedSongs(prev => new Set(prev).add(song.title));
         await refreshRankings();
         setIsLiking(null);

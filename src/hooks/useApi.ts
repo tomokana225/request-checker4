@@ -21,6 +21,7 @@ const DEFAULT_UI_CONFIG: UiConfig = {
         printGakufu: { label: 'ぷりんと楽譜', enabled: true },
         list: { label: 'List', enabled: true },
         ranking: { label: 'Ranking', enabled: true },
+        likeRanking: { label: 'いいね', enabled: true },
         requests: { label: 'Requests', enabled: true },
         news: { label: 'お知らせ', enabled: true },
         suggest: { label: 'Suggest', enabled: true },
@@ -35,12 +36,14 @@ export const useApi = () => {
     const [songRankingList, setSongRankingList] = useState<RankingItem[]>([]);
     const [artistRankingList, setArtistRankingList] = useState<ArtistRankingItem[]>([]);
     const [requestRankingList, setRequestRankingList] = useState<RequestRankingItem[]>([]);
+    const [songLikeRankingList, setSongLikeRankingList] = useState<RankingItem[]>([]);
     const [recentRequests, setRecentRequests] = useState<RequestRankingItem[]>([]);
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [adminPosts, setAdminPosts] = useState<BlogPost[]>([]); // For admin panel
     const [uiConfig, setUiConfig] = useState<UiConfig>(DEFAULT_UI_CONFIG);
     const [setlistSuggestions, setSetlistSuggestions] = useState<SetlistSuggestion[]>([]);
     const [rankingPeriod, setRankingPeriod] = useState<RankingPeriod>('all');
+    const [likeRankingPeriod, setLikeRankingPeriod] = useState<RankingPeriod>('all');
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -65,6 +68,22 @@ export const useApi = () => {
         }
     }, []);
     
+    const fetchLikeRankings = useCallback(async (period: RankingPeriod) => {
+        try {
+            const res = await fetch(`/api/get-like-ranking?period=${period}`);
+            if (!res.ok) {
+                console.error('Failed to fetch like ranking data');
+                setSongLikeRankingList([]);
+                return;
+            }
+            const data = await res.json();
+            setSongLikeRankingList(data || []);
+        } catch (err) {
+            console.error("Failed to refresh like rankings", err);
+            setSongLikeRankingList([]);
+        }
+    }, []);
+
     const fetchData = useCallback(async () => {
         // This function fetches non-ranking data. Rankings are fetched separately.
         setIsLoading(true);
@@ -105,7 +124,10 @@ export const useApi = () => {
             setSetlistSuggestions(setlistSuggestionsData || []);
             setRecentRequests(recentRequestsData || []);
             
-            await fetchRankings('all'); // Fetch initial (all-time) rankings
+            await Promise.all([
+                fetchRankings('all'), 
+                fetchLikeRankings('all')
+            ]);
             
         } catch (err: any) {
             setError(err.message);
@@ -113,18 +135,23 @@ export const useApi = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [fetchRankings]);
+    }, [fetchRankings, fetchLikeRankings]);
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
     useEffect(() => {
-        // This effect re-fetches rankings when the period changes, but not on initial load.
         if (!isLoading) {
             fetchRankings(rankingPeriod);
         }
     }, [rankingPeriod, isLoading, fetchRankings]);
+
+    useEffect(() => {
+        if (!isLoading) {
+            fetchLikeRankings(likeRankingPeriod);
+        }
+    }, [likeRankingPeriod, isLoading, fetchLikeRankings]);
 
     const postData = useCallback(async (url: string, body: object) => {
         try {
@@ -183,6 +210,10 @@ export const useApi = () => {
     const logRequest = useCallback(async (term: string, artist: string, requester: string) => {
         await postData('/api/log-request', { term, artist, requester });
     }, [postData]);
+
+    const logLike = useCallback(async (term: string, artist: string) => {
+        await postData('/api/log-like', { term, artist });
+    }, [postData]);
     
     const saveSetlistSuggestion = useCallback(async (songs: string[], requester: string) => {
         const result = await postData('/api/songs?action=saveSetlistSuggestion', { songs, requester });
@@ -193,7 +224,10 @@ export const useApi = () => {
     }, [postData, fetchData]);
 
     const refreshRankings = useCallback(async () => {
-        await fetchRankings(rankingPeriod);
+        await Promise.all([
+            fetchRankings(rankingPeriod),
+            fetchLikeRankings(likeRankingPeriod)
+        ]);
         try {
             const res = await fetch('/api/songs?action=getRecentRequests');
             if (res.ok) {
@@ -203,7 +237,7 @@ export const useApi = () => {
         } catch (err) {
             console.error("Failed to refetch recent requests", err);
         }
-    }, [rankingPeriod, fetchRankings]);
+    }, [rankingPeriod, likeRankingPeriod, fetchRankings, fetchLikeRankings]);
 
 
     return {
@@ -212,6 +246,7 @@ export const useApi = () => {
         songRankingList,
         artistRankingList,
         requestRankingList,
+        songLikeRankingList,
         recentRequests,
         posts,
         adminPosts,
@@ -221,12 +256,15 @@ export const useApi = () => {
         error,
         rankingPeriod,
         setRankingPeriod,
+        likeRankingPeriod,
+        setLikeRankingPeriod,
         onSaveSongs,
         onSaveUiConfig,
         onSavePost,
         onDeletePost,
         logSearch,
         logRequest,
+        logLike,
         saveSetlistSuggestion,
         refreshRankings,
         refetchPosts: fetchData,

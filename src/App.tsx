@@ -5,6 +5,7 @@ import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { SearchView } from './views/SearchView';
 import { ListView } from './views/ListView';
 import { RankingView } from './views/RankingView';
+import { LikeRankingView } from './views/LikeRankingView';
 import { RequestRankingView } from './views/RequestRankingView';
 import { BlogView } from './views/BlogView';
 import { SetlistSuggestionView } from './views/SetlistSuggestionView';
@@ -15,16 +16,18 @@ import { SupportModal } from './features/support/SupportModal';
 import { 
     SearchIcon, MusicNoteIcon, ChartBarIcon, HeartIcon, NewspaperIcon, 
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, TwitcasIcon, XSocialIcon,
-    DocumentTextIcon
+    DocumentTextIcon, CloudUploadIcon
 } from './components/ui/Icons';
 
 
 const App: React.FC = () => {
     const { 
-        songs, songRankingList, artistRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
-        isLoading, error, rankingPeriod, setRankingPeriod,
+        songs, songRankingList, artistRankingList, songLikeRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
+        isLoading, error, 
+        rankingPeriod, setRankingPeriod,
+        likeRankingPeriod, setLikeRankingPeriod,
         onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
-        logSearch, logRequest, saveSetlistSuggestion, refreshRankings
+        logSearch, logRequest, logLike, saveSetlistSuggestion, refreshRankings
     } = useApi();
     
     const [mode, setMode] = useState<Mode>('search');
@@ -84,11 +87,13 @@ const App: React.FC = () => {
 
         switch (mode) {
             case 'search':
-                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
             case 'list':
-                return <ListView songs={songs} logRequest={logRequest} refreshRankings={refreshRankings} />;
+                return <ListView songs={songs} logLike={logLike} refreshRankings={refreshRankings} />;
             case 'ranking':
                 return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
+            case 'likeRanking':
+                return <LikeRankingView songRanking={songLikeRankingList} period={likeRankingPeriod} setPeriod={setLikeRankingPeriod} />;
             case 'requests':
                 return <RequestRankingView recentRequests={recentRequests} logRequest={logRequest} refreshRankings={refreshRankings} />;
             case 'news':
@@ -96,7 +101,7 @@ const App: React.FC = () => {
             case 'setlist':
                  return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
             default:
-                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
         }
     };
 
@@ -112,14 +117,15 @@ const App: React.FC = () => {
             },
             list: { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
             ranking: { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
+            likeRanking: { mode: 'likeRanking', icon: HeartIcon, config: uiConfig.navButtons.likeRanking },
             news: { mode: 'news', icon: NewspaperIcon, config: uiConfig.navButtons.news },
-            requests: { mode: 'requests', icon: HeartIcon, config: uiConfig.navButtons.requests },
+            requests: { mode: 'requests', icon: CloudUploadIcon, config: uiConfig.navButtons.requests },
             suggest: { mode: 'suggest', icon: LightBulbIcon, config: uiConfig.navButtons.suggest },
             setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
         };
 
         const buttonOrder: (keyof typeof uiConfig.navButtons)[] = [
-            'search', 'printGakufu', 'list', 'ranking', 'news', 'requests', 'suggest', 'setlist'
+            'search', 'printGakufu', 'list', 'ranking', 'likeRanking', 'news', 'requests', 'suggest', 'setlist'
         ];
 
         return buttonOrder
@@ -231,7 +237,7 @@ const App: React.FC = () => {
                     </header>
                     
                     <nav className="w-full max-w-4xl mb-8">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-9 gap-3">
                             {navButtons.map(button => {
                                 if (!button.config) return null;
                                 const isExternal = 'href' in button;
