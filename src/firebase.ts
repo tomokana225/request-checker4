@@ -1,12 +1,10 @@
-
-// FIX: The original import `import { initializeApp, getApps } from 'firebase/app';`
-// is for Firebase v9+ modular SDK. The error "Module has no exported member"
-// suggests an older version of Firebase (v8 or below) is used, which uses a
-// namespaced syntax.
+// FIX: The Firebase SDK version on the client appears to be v8 or a similar version
+// that does not use modular, named exports from 'firebase/app'. The original v9 syntax
+// `import { initializeApp, getApps } from 'firebase/app'` was causing an error.
+// Switched to the v8 syntax which uses a default `firebase` export.
 import firebase from 'firebase/app';
 
 const initializeFirebase = async () => {
-  // FIX: Use Firebase v8 namespaced syntax to check for existing apps.
   if (firebase.apps.length > 0) {
     // Firebase is already initialized, do nothing.
     return;
@@ -22,7 +20,6 @@ const initializeFirebase = async () => {
       console.error("Firebase config is missing API key. Firebase will not be initialized.");
       return;
     }
-    // FIX: Use Firebase v8 namespaced syntax for initialization.
     firebase.initializeApp(firebaseConfig);
   } catch (error) {
     console.error("Firebase initialization error:", error);
