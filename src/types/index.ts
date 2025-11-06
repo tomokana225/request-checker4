@@ -87,6 +87,6 @@ export interface UiConfig {
     }
 }
 
-export type Mode = 'search' | 'list' | 'ranking' | 'likeRanking' | 'requests' | 'news' | 'setlist';
+export type Mode = 'search' | 'list' | 'ranking' | 'requests' | 'news' | 'setlist';
 
 export type RankingPeriod = 'all' | 'month' | 'year';

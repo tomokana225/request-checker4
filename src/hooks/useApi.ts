@@ -47,7 +47,6 @@ export const useApi = () => {
     const [uiConfig, setUiConfig] = useState<UiConfig>(DEFAULT_UI_CONFIG);
     const [setlistSuggestions, setSetlistSuggestions] = useState<SetlistSuggestion[]>([]);
     const [rankingPeriod, setRankingPeriod] = useState<RankingPeriod>('all');
-    const [likeRankingPeriod, setLikeRankingPeriod] = useState<RankingPeriod>('all');
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -148,14 +147,9 @@ export const useApi = () => {
     useEffect(() => {
         if (!isLoading) {
             fetchRankings(rankingPeriod);
+            fetchLikeRankings(rankingPeriod);
         }
-    }, [rankingPeriod, isLoading, fetchRankings]);
-
-    useEffect(() => {
-        if (!isLoading) {
-            fetchLikeRankings(likeRankingPeriod);
-        }
-    }, [likeRankingPeriod, isLoading, fetchLikeRankings]);
+    }, [rankingPeriod, isLoading, fetchRankings, fetchLikeRankings]);
 
     const postData = useCallback(async (url: string, body: object) => {
         try {
@@ -230,7 +224,7 @@ export const useApi = () => {
     const refreshRankings = useCallback(async () => {
         await Promise.all([
             fetchRankings(rankingPeriod),
-            fetchLikeRankings(likeRankingPeriod)
+            fetchLikeRankings(rankingPeriod)
         ]);
         try {
             const res = await fetch('/api/songs?action=getRecentRequests');
@@ -241,7 +235,7 @@ export const useApi = () => {
         } catch (err) {
             console.error("Failed to refetch recent requests", err);
         }
-    }, [rankingPeriod, likeRankingPeriod, fetchRankings, fetchLikeRankings]);
+    }, [rankingPeriod, fetchRankings, fetchLikeRankings]);
 
 
     return {
@@ -260,8 +254,6 @@ export const useApi = () => {
         error,
         rankingPeriod,
         setRankingPeriod,
-        likeRankingPeriod,
-        setLikeRankingPeriod,
         onSaveSongs,
         onSaveUiConfig,
         onSavePost,

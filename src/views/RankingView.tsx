@@ -6,6 +6,7 @@ interface RankingViewProps {
     songs: Song[];
     songRanking: RankingItem[];
     artistRanking: ArtistRankingItem[];
+    songLikeRanking: RankingItem[];
     period: RankingPeriod;
     setPeriod: (period: RankingPeriod) => void;
 }
@@ -106,10 +107,53 @@ const ArtistRankingTab: React.FC<{ artists: ArtistRankingItem[], songs: Song[] }
     );
 };
 
-export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, artistRanking, period, setPeriod }) => {
+const LikeRankingList: React.FC<{ songs: RankingItem[] }> = ({ songs }) => {
+    return (
+        <div className="space-y-3 animate-fade-in-fast">
+            {songs.length > 0 ? songs.map((item, index) => {
+                const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.artist} ${item.id}`)}`;
+                const lyricsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${item.artist} ${item.id} 歌詞`)}`;
+                return (
+                    <div key={item.id} className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-md">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 flex-grow min-w-0 text-left">
+                                <div className="text-xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
+                                <div className="flex-grow min-w-0">
+                                    <h3 className="font-bold text-base text-gray-900 dark:text-white">{item.id}</h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{item.artist}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 ml-2 flex-shrink-0">
+                                <p className="text-base font-semibold text-pink-600 dark:text-pink-400">{item.count} いいね</p>
+                                <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
+                                <ActionButton href={lyricsSearchUrl} title="歌詞を検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
+                            </div>
+                        </div>
+                    </div>
+                );
+            }) : <p className="text-center text-gray-500 dark:text-gray-400 mt-8">ランキングデータがありません。</p>}
+        </div>
+    );
+};
+
+export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, artistRanking, songLikeRanking, period, setPeriod }) => {
+    const [rankingType, setRankingType] = useState<'search' | 'like'>('search');
     const [activeTab, setActiveTab] = useState<'song' | 'artist'>('song');
 
-    const TabButton: React.FC<{ tab: 'song' | 'artist', label: string }> = ({ tab, label }) => {
+    const RankingTypeButton: React.FC<{ type: 'search' | 'like', label: string }> = ({ type, label }) => {
+        const isActive = rankingType === type;
+        return (
+            <button
+                onClick={() => setRankingType(type)}
+                className={`w-1/2 py-2.5 text-md font-bold transition-colors focus:outline-none ${isActive ? 'bg-white dark:bg-gray-800 shadow text-cyan-600 dark:text-cyan-400' : 'text-gray-500 dark:text-gray-400'}`}
+                 style={{color: isActive ? 'var(--primary-color)' : ''}}
+            >
+                {label}
+            </button>
+        );
+    };
+    
+    const SearchSubTabButton: React.FC<{ tab: 'song' | 'artist', label: string }> = ({ tab, label }) => {
         const isActive = activeTab === tab;
         return (
             <button
@@ -137,7 +181,7 @@ export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, ar
 
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
-            <h2 className="text-3xl font-bold text-center mb-4">検索数ランキング</h2>
+            <h2 className="text-3xl font-bold text-center mb-4">ランキング</h2>
             
             <div className="flex justify-center mb-6">
                 <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
@@ -147,16 +191,31 @@ export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, ar
                 </div>
             </div>
 
-            <div className="flex justify-center mb-4">
-                 <div className="w-full max-w-xs flex p-1 bg-gray-200 dark:bg-gray-700/50 rounded-lg">
-                    <TabButton tab="song" label="曲" />
-                    <TabButton tab="artist" label="アーティスト" />
-                </div>
+            <div className="w-full max-w-md mx-auto flex p-1 bg-gray-200 dark:bg-gray-700/50 rounded-lg mb-4">
+                <RankingTypeButton type="search" label="検索数" />
+                <RankingTypeButton type="like" label="いいね数" />
             </div>
 
-            <div className="p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg shadow-inner">
-                {activeTab === 'song' ? <SongRankingTab songs={songRanking} /> : <ArtistRankingTab artists={artistRanking} songs={songs} />}
-            </div>
+            {rankingType === 'search' && (
+                <div className="animate-fade-in">
+                    <div className="flex justify-center mb-4">
+                        <div className="w-full max-w-xs flex p-1 bg-gray-200 dark:bg-gray-700/50 rounded-lg">
+                            <SearchSubTabButton tab="song" label="曲" />
+                            <SearchSubTabButton tab="artist" label="アーティスト" />
+                        </div>
+                    </div>
+
+                    <div className="p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg shadow-inner">
+                        {activeTab === 'song' ? <SongRankingTab songs={songRanking} /> : <ArtistRankingTab artists={artistRanking} songs={songs} />}
+                    </div>
+                </div>
+            )}
+            
+            {rankingType === 'like' && (
+                <div className="p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg shadow-inner animate-fade-in">
+                    <LikeRankingList songs={songLikeRanking} />
+                </div>
+            )}
         </div>
     );
 };

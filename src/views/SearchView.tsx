@@ -13,12 +13,12 @@ interface SearchViewProps {
     refreshRankings: () => void;
     searchTerm: string;
     setSearchTerm: (term: string) => void;
-    setIsAdminModalOpen: (isOpen: boolean) => void;
+    onAdminLogin: () => void;
 }
 
 const MAX_RELATED_SONGS = 5;
 
-export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, setIsAdminModalOpen }) => {
+export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, onAdminLogin }) => {
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [suggestions, setSuggestions] = useState<Song[]>([]);
@@ -64,7 +64,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         if (term.trim().toLowerCase() === 'admin') {
             const password = prompt('Enter admin password:');
             if (password === 'admin') {
-                setIsAdminModalOpen(true);
+                onAdminLogin();
             } else if (password) {
                 alert('Incorrect password.');
             }
@@ -112,7 +112,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
             });
         }
 
-    }, [logSearch, normalizedSongs, setIsAdminModalOpen, setSearchTerm]);
+    }, [logSearch, normalizedSongs, onAdminLogin, setSearchTerm]);
     
     useEffect(() => {
         // If the view is loaded with a pre-existing search term (e.g., from the suggest modal),

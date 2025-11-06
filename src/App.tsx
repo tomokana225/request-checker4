@@ -5,7 +5,6 @@ import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { SearchView } from './views/SearchView';
 import { ListView } from './views/ListView';
 import { RankingView } from './views/RankingView';
-import { LikeRankingView } from './views/LikeRankingView';
 import { RequestRankingView } from './views/RequestRankingView';
 import { BlogView } from './views/BlogView';
 import { SetlistSuggestionView } from './views/SetlistSuggestionView';
@@ -16,7 +15,7 @@ import { SupportModal } from './features/support/SupportModal';
 import { 
     SearchIcon, MusicNoteIcon, ChartBarIcon, HeartIcon, NewspaperIcon, 
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, TwitcasIcon, XSocialIcon,
-    DocumentTextIcon, CloudUploadIcon
+    DocumentTextIcon, CloudUploadIcon, CogIcon
 } from './components/ui/Icons';
 
 
@@ -25,7 +24,6 @@ const App: React.FC = () => {
         songs, songRankingList, artistRankingList, songLikeRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
         isLoading, error, 
         rankingPeriod, setRankingPeriod,
-        likeRankingPeriod, setLikeRankingPeriod,
         onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
         logSearch, logRequest, logLike, saveSetlistSuggestion, refreshRankings
     } = useApi();
@@ -36,6 +34,7 @@ const App: React.FC = () => {
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
     useEffect(() => {
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -77,6 +76,11 @@ const App: React.FC = () => {
         setMode('search');
     }, []);
 
+    const handleAdminLogin = useCallback(() => {
+        setIsAdminAuthenticated(true);
+        setIsAdminModalOpen(true);
+    }, []);
+
     const renderView = () => {
         if (isLoading) {
             return (
@@ -92,13 +96,11 @@ const App: React.FC = () => {
 
         switch (mode) {
             case 'search':
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} />;
             case 'list':
                 return <ListView songs={songs} logLike={logLike} refreshRankings={refreshRankings} />;
             case 'ranking':
-                return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
-            case 'likeRanking':
-                return <LikeRankingView songRanking={songLikeRankingList} period={likeRankingPeriod} setPeriod={setLikeRankingPeriod} />;
+                return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} songLikeRanking={songLikeRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
                 return <RequestRankingView recentRequests={recentRequests} logRequest={logRequest} refreshRankings={refreshRankings} />;
             case 'news':
@@ -106,7 +108,7 @@ const App: React.FC = () => {
             case 'setlist':
                  return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
             default:
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} />;
         }
     };
 
@@ -122,7 +124,6 @@ const App: React.FC = () => {
             },
             list: { mode: 'list', icon: MusicNoteIcon, config: uiConfig.navButtons.list },
             ranking: { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
-            likeRanking: { mode: 'likeRanking', icon: HeartIcon, config: uiConfig.navButtons.likeRanking },
             news: { mode: 'news', icon: NewspaperIcon, config: uiConfig.navButtons.news },
             requests: { mode: 'requests', icon: CloudUploadIcon, config: uiConfig.navButtons.requests },
             suggest: { mode: 'suggest', icon: LightBulbIcon, config: uiConfig.navButtons.suggest },
@@ -130,7 +131,7 @@ const App: React.FC = () => {
         };
 
         const buttonOrder: (keyof typeof uiConfig.navButtons)[] = [
-            'search', 'printGakufu', 'list', 'ranking', 'likeRanking', 'news', 'requests', 'suggest', 'setlist'
+            'search', 'printGakufu', 'list', 'ranking', 'news', 'requests', 'suggest', 'setlist'
         ];
 
         return buttonOrder
@@ -242,7 +243,7 @@ const App: React.FC = () => {
                     </header>
                     
                     <nav className="w-full max-w-4xl mb-8">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-9 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-3">
                             {navButtons.map(button => {
                                 if (!button.config) return null;
                                 const isExternal = 'href' in button;
@@ -299,6 +300,17 @@ const App: React.FC = () => {
                 onClose={() => setIsSupportModalOpen(false)}
                 uiConfig={uiConfig}
             />
+            
+            {isAdminAuthenticated && (
+                <button
+                    onClick={() => setIsAdminModalOpen(true)}
+                    className="fixed bottom-4 right-4 bg-purple-600 hover:bg-purple-700 text-white font-bold p-3 rounded-full shadow-lg z-50 transition-transform transform hover:scale-110"
+                    aria-label="管理者パネルを開く"
+                    title="管理者パネル"
+                >
+                    <CogIcon className="w-6 h-6" />
+                </button>
+            )}
         </>
     );
 };
