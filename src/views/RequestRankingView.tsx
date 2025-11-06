@@ -5,7 +5,7 @@ import { containsNGWord } from '../utils/validation';
 import { RequestRankingItem } from '../types';
 
 interface RequestRankingViewProps {
-    requestRanking: RequestRankingItem[];
+    newlyRequestedSongs: RequestRankingItem[];
     logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     refreshRankings: () => void;
 }
@@ -86,7 +86,7 @@ const RequestForm: React.FC<{
 };
 
 
-export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ requestRanking, logRequest, refreshRankings }) => {
+export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ newlyRequestedSongs, logRequest, refreshRankings }) => {
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
             <h2 className="text-3xl font-bold text-center mb-2 flex items-center justify-center gap-3">
@@ -101,10 +101,10 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ requestR
 
             <div className="mt-12">
                 <h3 className="text-xl font-bold text-center mb-4">現在のリクエスト一覧</h3>
-                {requestRanking.length > 0 ? (
+                {newlyRequestedSongs.length > 0 ? (
                     <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg max-h-80 overflow-y-auto custom-scrollbar border border-gray-200 dark:border-gray-700 shadow-md">
                         <ul className="space-y-2">
-                            {requestRanking.map((item) => (
+                            {newlyRequestedSongs.map((item) => (
                                 <li key={item.id} className="text-gray-800 dark:text-gray-200 p-2 bg-gray-100 dark:bg-gray-700 rounded-md">
                                     {item.id}
                                 </li>

@@ -1,7 +1,8 @@
-import { initializeApp, getApps } from 'firebase/app';
+import firebase from 'firebase/app';
 
 const initializeFirebase = async () => {
-  if (getApps().length > 0) {
+  // FIX: Use Firebase v8 syntax `firebase.apps.length` instead of v9's `getApps().length` to check if Firebase is already initialized.
+  if (firebase.apps.length > 0) {
     // Firebase is already initialized, do nothing.
     return;
   }
@@ -16,7 +17,8 @@ const initializeFirebase = async () => {
       console.error("Firebase config is missing API key. Firebase will not be initialized.");
       return;
     }
-    initializeApp(firebaseConfig);
+    // FIX: Use Firebase v8 syntax `firebase.initializeApp()` instead of v9's standalone `initializeApp()`.
+    firebase.initializeApp(firebaseConfig);
   } catch (error) {
     console.error("Firebase initialization error:", error);
     return;
