@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
-import { Mode } from './types';
+import { Mode, Song } from './types';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { SearchView } from './views/SearchView';
 import { ListView } from './views/ListView';
@@ -33,6 +33,26 @@ const App: React.FC = () => {
     const [isSuggestModalOpen, setIsSuggestModalOpen] = useState(false);
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    
+    const [isLiking, setIsLiking] = useState<string | null>(null);
+    const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
+    const [likeMessage, setLikeMessage] = useState('');
+
+    const showLikeMessage = (msg: string) => {
+        setLikeMessage(msg);
+        setTimeout(() => setLikeMessage(''), 3000);
+    };
+
+    const handleLike = async (song: Song) => {
+        if (likedSongs.has(song.title)) return; // Already liked this session
+
+        setIsLiking(song.title);
+        await logRequest(song.title, song.artist, ''); // Log anonymously with artist
+        setLikedSongs(prev => new Set(prev).add(song.title));
+        await refreshRankings();
+        setIsLiking(null);
+        showLikeMessage(`「${song.title}」にいいねしました！`);
+    };
 
     useEffect(() => {
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -84,9 +104,9 @@ const App: React.FC = () => {
 
         switch (mode) {
             case 'search':
-                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
+                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} handleLike={handleLike} isLiking={isLiking} likedSongs={likedSongs} likeMessage={likeMessage} />;
             case 'list':
-                return <ListView songs={songs} />;
+                return <ListView songs={songs} handleLike={handleLike} isLiking={isLiking} likedSongs={likedSongs} likeMessage={likeMessage} />;
             case 'ranking':
                 return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} requestRanking={requestRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
@@ -96,7 +116,7 @@ const App: React.FC = () => {
             case 'setlist':
                  return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
             default:
-                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
+                return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} handleLike={handleLike} isLiking={isLiking} likedSongs={likedSongs} likeMessage={likeMessage} />;
         }
     };
 
