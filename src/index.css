@@ -36,3 +36,25 @@ h4 { font-size: calc(1.25rem * var(--heading-font-scale, 1)); } /* text-xl base 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { 
   background: rgba(34, 211, 238, 0.8); 
 }
+
+@keyframes slot-flicker {
+  0% { opacity: 0.5; transform: translateY(-5px) scale(0.98); }
+  25% { opacity: 1; transform: translateY(0) scale(1.02); }
+  50% { opacity: 0.7; transform: translateY(5px) scale(0.99); }
+  75% { opacity: 1; transform: translateY(0) scale(1.01); }
+  100% { opacity: 0.6; transform: translateY(-3px) scale(1); }
+}
+
+.animate-slot-flicker {
+  animation: slot-flicker 0.1s linear infinite;
+}
+
+@keyframes slot-result-pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  70% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-slot-result-pop {
+  animation: slot-result-pop 0.4s ease-out;
+}

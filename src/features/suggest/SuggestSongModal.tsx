@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Song } from '../../types';
 import { XIcon, YouTubeIcon, DocumentTextIcon } from '../../components/ui/Icons';
 
@@ -10,73 +10,58 @@ interface SuggestSongModalProps {
 }
 
 type GamePhase = 'idle' | 'spinning' | 'result';
-const REEL_ITEMS_COUNT = 30; // Number of items to show in the reel animation
-const SPIN_DURATION_MS = 2500; // How long the spin animation lasts
 
 export const SuggestSongModal: React.FC<SuggestSongModalProps> = ({ isOpen, onClose, songs, onSelect }) => {
     const [suggestedSong, setSuggestedSong] = useState<Song | null>(null);
+    const [flickerSong, setFlickerSong] = useState<Song | null>(null);
     const [isCopied, setIsCopied] = useState(false);
     const [gamePhase, setGamePhase] = useState<GamePhase>('idle');
-    
-    // State for the reels
-    const [reel1Items, setReel1Items] = useState<Song[]>([]);
-    const [reel2Items, setReel2Items] = useState<Song[]>([]);
-    const [reel1Position, setReel1Position] = useState(0);
-    const [reel2Position, setReel2Position] = useState(0);
+    const intervalRef = useRef<number | null>(null);
 
     const startSpin = useCallback(() => {
         if (songs.length === 0) return;
 
         setIsCopied(false);
         setGamePhase('spinning');
-        
-        // Pick the final song
-        const finalSongIndex = Math.floor(Math.random() * songs.length);
-        const finalSong = songs[finalSongIndex];
+        setSuggestedSong(null);
 
-        // Prepare items for the reels
-        const createReelData = (items: Song[]) => {
-            const reelData = [];
-            for (let i = 0; i < REEL_ITEMS_COUNT - 1; i++) {
-                reelData.push(items[Math.floor(Math.random() * items.length)]);
-            }
-            reelData.push(finalSong); // Ensure the final song is the last item
-            return reelData;
-        };
+        intervalRef.current = window.setInterval(() => {
+            const randomIndex = Math.floor(Math.random() * songs.length);
+            setFlickerSong(songs[randomIndex]);
+        }, 80);
 
-        setReel1Items(createReelData(songs));
-        setReel2Items(createReelData(songs));
-
-        // Reset positions before spinning
-        setReel1Position(0);
-        setReel2Position(0);
-
-        // We use a timeout to allow React to render the initial state before applying the transition
         setTimeout(() => {
-            const reelItemHeight = 64; // Corresponds to h-16 in Tailwind
-            const finalPosition = (REEL_ITEMS_COUNT - 1) * reelItemHeight;
-            
-            // Stagger the reel stops for dramatic effect
-            setReel1Position(finalPosition);
-            setTimeout(() => setReel2Position(finalPosition), 400);
-
-            // Set the final result after the animation completes
-            setTimeout(() => {
-                setGamePhase('result');
-                setSuggestedSong(finalSong);
-            }, SPIN_DURATION_MS + 500);
-        }, 100);
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+            const finalSongIndex = Math.floor(Math.random() * songs.length);
+            const finalSong = songs[finalSongIndex];
+            setSuggestedSong(finalSong);
+            setFlickerSong(null);
+            setGamePhase('result');
+        }, 2000); // Spin for 2 seconds
 
     }, [songs]);
 
     useEffect(() => {
+        // Cleanup on unmount
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
         // Reset state when the modal is closed
         if (!isOpen) {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+            }
             setGamePhase('idle');
             setSuggestedSong(null);
+            setFlickerSong(null);
             setIsCopied(false);
-            setReel1Position(0);
-            setReel2Position(0);
         }
     }, [isOpen]);
 
@@ -91,7 +76,7 @@ export const SuggestSongModal: React.FC<SuggestSongModalProps> = ({ isOpen, onCl
     
     if (!isOpen) return null;
 
-    const transitionClasses = `transition-transform duration-[${SPIN_DURATION_MS}ms] ease-[cubic-bezier(0.25,1,0.5,1)]`;
+    const displaySong = flickerSong || suggestedSong;
     
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -102,38 +87,20 @@ export const SuggestSongModal: React.FC<SuggestSongModalProps> = ({ isOpen, onCl
                 <h2 className="text-2xl font-bold mb-4 dark:text-white">ランダムルーレット</h2>
                 
                 {/* Slot machine UI */}
-                <div className="relative h-16 w-full overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900/50 flex items-center justify-center p-4 my-6 text-center shadow-inner">
-                    {/* Gradient overlays for realism */}
-                    <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-gray-100 dark:from-gray-900/50 to-transparent z-10 pointer-events-none"></div>
-                    <div className="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-gray-100 dark:from-gray-900/50 to-transparent z-10 pointer-events-none"></div>
-                    
+                <div className="h-24 w-full flex items-center justify-center p-4 my-6 text-center">
                     {gamePhase === 'idle' && (
                         <p className="text-lg text-gray-500 dark:text-gray-400">何にする？</p>
                     )}
-
-                    {(gamePhase === 'spinning' || gamePhase === 'result') && (
-                        <div className="flex w-full h-full justify-between items-center overflow-hidden">
-                            {/* Reel 1: Title */}
-                            <div className="w-1/2 h-full overflow-hidden relative">
-                                <div className={`absolute top-0 left-0 w-full ${transitionClasses}`} style={{ transform: `translateY(-${reel1Position}px)` }}>
-                                    {reel1Items.map((song, index) => (
-                                        <div key={index} className="h-16 flex items-center justify-center">
-                                            <p className="text-xl font-bold truncate" style={{color: 'var(--primary-color)'}}>{song.title}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            {/* Reel 2: Artist */}
-                            <div className="w-1/2 h-full overflow-hidden relative">
-                                <div className={`absolute top-0 left-0 w-full ${transitionClasses}`} style={{ transform: `translateY(-${reel2Position}px)` }}>
-                                    {reel2Items.map((song, index) => (
-                                        <div key={index} className="h-16 flex items-center justify-center">
-                                             <p className="text-md text-gray-700 dark:text-gray-300 truncate">{song.artist}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                    {gamePhase === 'spinning' && displaySong && (
+                        <div className="animate-slot-flicker">
+                            <h3 className="text-xl font-bold" style={{color: 'var(--primary-color)'}}>{displaySong.title}</h3>
+                            <p className="text-md text-gray-700 dark:text-gray-300">{displaySong.artist}</p>
+                        </div>
+                    )}
+                    {gamePhase === 'result' && displaySong && (
+                         <div className="animate-slot-result-pop">
+                             <h3 className="text-2xl font-bold" style={{color: 'var(--primary-color)'}}>{displaySong.title}</h3>
+                            <p className="text-lg text-gray-700 dark:text-gray-300">{displaySong.artist}</p>
                         </div>
                     )}
                 </div>
