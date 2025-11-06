@@ -87,20 +87,20 @@ export const SuggestSongModal: React.FC<SuggestSongModalProps> = ({ isOpen, onCl
                 <h2 className="text-2xl font-bold mb-4 dark:text-white">ランダムルーレット</h2>
                 
                 {/* Slot machine UI */}
-                <div className="h-24 w-full flex items-center justify-center p-4 my-6 text-center">
+                <div className="h-32 w-full flex items-center justify-center p-4 my-6 text-center">
                     {gamePhase === 'idle' && (
-                        <p className="text-lg text-gray-500 dark:text-gray-400">何にする？</p>
+                        <p className="text-xl text-gray-500 dark:text-gray-400">何にする？</p>
                     )}
                     {gamePhase === 'spinning' && displaySong && (
                         <div className="animate-slot-flicker">
-                            <h3 className="text-xl font-bold" style={{color: 'var(--primary-color)'}}>{displaySong.title}</h3>
-                            <p className="text-md text-gray-700 dark:text-gray-300">{displaySong.artist}</p>
+                            <h3 className="text-3xl font-bold" style={{color: 'var(--primary-color)'}}>{displaySong.title}</h3>
+                            <p className="text-lg text-gray-700 dark:text-gray-300">{displaySong.artist}</p>
                         </div>
                     )}
                     {gamePhase === 'result' && displaySong && (
                          <div className="animate-slot-result-pop">
-                             <h3 className="text-2xl font-bold" style={{color: 'var(--primary-color)'}}>{displaySong.title}</h3>
-                            <p className="text-lg text-gray-700 dark:text-gray-300">{displaySong.artist}</p>
+                             <h3 className="text-4xl font-bold" style={{color: 'var(--primary-color)'}}>{displaySong.title}</h3>
+                            <p className="text-xl text-gray-700 dark:text-gray-300">{displaySong.artist}</p>
                         </div>
                     )}
                 </div>

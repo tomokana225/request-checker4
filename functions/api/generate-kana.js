@@ -1,6 +1,6 @@
 // This serverless function runs on Cloudflare.
 // It securely calls the Gemini API to generate kana readings for song titles and artist names.
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Type } from '@google/genai';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -37,22 +37,50 @@ export async function onRequest(context) {
         
         const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 
-        const prompt = `以下の日本の曲名とアーティスト名のリストについて、一般的なカタカナの読み仮名を括弧付きで追記してください。
-- 英語名、数字、記号のみ、または既にカタカナ/ひらがなの場合は、読み仮名は不要です。その場合は元の文字列をそのまま返してください。
+        const prompt = `以下の日本の曲名とアーティスト名のJSONリストについて、一般的なカタカナの読み仮名を括弧付きで追記した結果を返してください。
+- 英語名、数字、記号のみ、または既にカタカナ/ひらがなの場合は、読み仮名は不要です。その場合は元の文字列をそのまま updatedTitle/updatedArtist に入れてください。
 - 読み仮名が必要な漢字や英語表記の場合のみ「元の名前(カタカナ)」の形式にしてください。
-- 結果はJSON配列で、各要素は { "originalTitle": "元の曲名", "updatedTitle": "更新後の曲名", "originalArtist": "元のアーティスト名", "updatedArtist": "更新後のアーティスト名" } の形式で返してください。
 
 リスト:
 ${JSON.stringify(songs)}
 `;
+        
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
-            config: { responseMimeType: "application/json" }
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            originalTitle: {
+                                type: Type.STRING,
+                                description: "元の曲名",
+                            },
+                            updatedTitle: {
+                                type: Type.STRING,
+                                description: "ふりがなを追記した曲名",
+                            },
+                            originalArtist: {
+                                type: Type.STRING,
+                                description: "元のアーティスト名",
+                            },
+                            updatedArtist: {
+                                type: Type.STRING,
+                                description: "ふりがなを追記したアーティスト名",
+                            },
+                        },
+                        required: ["originalTitle", "updatedTitle", "originalArtist", "updatedArtist"],
+                    },
+                },
+            },
         });
-
-        const rawJson = (response.text ?? '').trim().replace(/^```json\s*|```\s*$/g, '');
-        const kanaResults = rawJson ? JSON.parse(rawJson) : [];
+        
+        // With responseSchema, the response.text is guaranteed to be a valid JSON string
+        // matching the schema.
+        const kanaResults = JSON.parse(response.text);
         
         return jsonResponse(kanaResults);
 
