@@ -72,7 +72,7 @@ export const SuggestSongModal: React.FC<SuggestSongModalProps> = ({ isOpen, onCl
                 <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 dark:hover:text-white" disabled={gamePhase === 'spinning'}>
                     <XIcon className="w-6 h-6" />
                 </button>
-                <h2 className="text-2xl font-bold mb-4">今日のイチオシ！</h2>
+                <h2 className="text-2xl font-bold mb-4 dark:text-white">ランダムルーレット</h2>
                 
                 {/* Slot machine UI */}
                 <div className="relative h-24 w-full overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900/50 flex items-center justify-center p-4 my-6 text-center shadow-inner">

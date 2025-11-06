@@ -30,7 +30,7 @@ const DEFAULT_UI_CONFIG = {
         search: { label: '曲を検索', enabled: true },
         printGakufu: { label: 'ぷりんと楽譜', enabled: true },
         list: { label: '曲リスト', enabled: true },
-        ranking: { label: '人気曲', enabled: true },
+        ranking: { label: 'ランキング', enabled: true },
         news: { label: 'お知らせ', enabled: true },
         requests: { label: 'リクエスト', enabled: true },
         suggest: { label: 'おまかせ選曲', enabled: true },

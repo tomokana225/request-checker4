@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Song, RankingItem, ArtistRankingItem, RankingPeriod } from '../types';
+import { Song, RankingItem, ArtistRankingItem, RankingPeriod, RequestRankingItem } from '../types';
 import { YouTubeIcon, DocumentTextIcon, ChevronDownIcon } from '../components/ui/Icons';
 
 interface RankingViewProps {
     songs: Song[];
     songRanking: RankingItem[];
     artistRanking: ArtistRankingItem[];
+    requestRanking: RequestRankingItem[];
     period: RankingPeriod;
     setPeriod: (period: RankingPeriod) => void;
 }
@@ -106,16 +107,65 @@ const ArtistRankingTab: React.FC<{ artists: ArtistRankingItem[], songs: Song[] }
     );
 };
 
+const LikeRankingTab: React.FC<{ requests: RequestRankingItem[] }> = ({ requests }) => {
+    const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
-export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, artistRanking, period, setPeriod }) => {
-    const [activeTab, setActiveTab] = useState<'song' | 'artist'>('song');
+    return (
+        <div className="space-y-3 animate-fade-in-fast">
+            {requests.length > 0 ? requests.map((item, index) => {
+                const isExpanded = expandedItem === item.id;
+                const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.artist} ${item.id}`)}`;
+                const printGakufuUrl = `https://www.print-gakufu.com/search/result/score___keyword__${encodeURIComponent(item.id)}/`;
+                return (
+                    <div key={item.id} className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-md overflow-hidden">
+                        <div className="flex items-center justify-between">
+                            <button onClick={() => setExpandedItem(isExpanded ? null : item.id)} className="flex items-center gap-3 flex-grow min-w-0 text-left">
+                                <div className="text-xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
+                                <div className="flex-grow min-w-0">
+                                    <h3 className="font-bold text-base text-gray-900 dark:text-white">{item.id}</h3>
+                                    {item.artist && <p className="text-xs text-gray-500 dark:text-gray-400">{item.artist}</p>}
+                                </div>
+                            </button>
+                            <div className="flex items-center gap-3 ml-2 flex-shrink-0">
+                                <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
+                                <ActionButton href={printGakufuUrl} title="ぷりんと楽譜で検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
+                            </div>
+                        </div>
+                        {isExpanded && (
+                            <div className="pl-11 pt-2 animate-fade-in">
+                                <p className="text-base font-semibold text-pink-600 dark:text-pink-400">いいね数: {item.count}票</p>
+                            </div>
+                        )}
+                    </div>
+                );
+            }) : <p className="text-center text-gray-500 dark:text-gray-400 mt-8">ランキングデータがありません。</p>}
+        </div>
+    );
+};
 
-    const TabButton: React.FC<{ tab: 'song' | 'artist', label: string }> = ({ tab, label }) => {
-        const isActive = activeTab === tab;
+
+export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, artistRanking, requestRanking, period, setPeriod }) => {
+    const [mainTab, setMainTab] = useState<'search' | 'like'>('search');
+    const [searchSubTab, setSearchSubTab] = useState<'song' | 'artist'>('song');
+
+    const MainTabButton: React.FC<{ tab: 'search' | 'like', label: string }> = ({ tab, label }) => {
+        const isActive = mainTab === tab;
         return (
             <button
-                onClick={() => setActiveTab(tab)}
-                className={`w-1/2 py-3 text-center font-semibold rounded-t-lg transition-colors focus:outline-none ${isActive ? 'bg-white dark:bg-gray-800' : 'bg-gray-200 dark:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-700/80 text-gray-500 dark:text-gray-400'}`}
+                onClick={() => setMainTab(tab)}
+                className={`w-1/2 py-3 text-center font-semibold rounded-t-lg transition-colors focus:outline-none ${isActive ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white' : 'bg-gray-200 dark:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-700/80 text-gray-500 dark:text-gray-400'}`}
+            >
+                {label}
+            </button>
+        );
+    };
+
+    const SearchSubTabButton: React.FC<{ tab: 'song' | 'artist', label: string }> = ({ tab, label }) => {
+        const isActive = searchSubTab === tab;
+        return (
+            <button
+                onClick={() => setSearchSubTab(tab)}
+                className={`flex-1 py-2 text-sm font-semibold transition-colors focus:outline-none ${isActive ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-600/50'}`}
             >
                 {label}
             </button>
@@ -137,7 +187,7 @@ export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, ar
 
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
-            <h2 className="text-3xl font-bold text-center mb-4">人気曲ランキング</h2>
+            <h2 className="text-3xl font-bold text-center mb-4">ランキング</h2>
             
             <div className="flex justify-center mb-6">
                 <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
@@ -148,11 +198,26 @@ export const RankingView: React.FC<RankingViewProps> = ({ songs, songRanking, ar
             </div>
             
             <div className="flex">
-                <TabButton tab="song" label="曲ランキング" />
-                <TabButton tab="artist" label="アーティストランキング" />
+                <MainTabButton tab="search" label="検索数ランキング" />
+                <MainTabButton tab="like" label="いいね数ランキング" />
             </div>
-            <div className="bg-white dark:bg-gray-800 p-4 rounded-b-lg shadow-lg">
-                {activeTab === 'song' ? <SongRankingTab songs={songRanking} /> : <ArtistRankingTab artists={artistRanking} songs={songs} />}
+
+            <div className="bg-white dark:bg-gray-800 rounded-b-lg shadow-lg">
+                {mainTab === 'search' ? (
+                    <div>
+                        <div className="flex bg-gray-100 dark:bg-gray-900/50 rounded-t-md overflow-hidden border-b border-gray-200 dark:border-gray-700">
+                             <SearchSubTabButton tab="song" label="曲" />
+                             <SearchSubTabButton tab="artist" label="アーティスト" />
+                        </div>
+                        <div className="p-4">
+                            {searchSubTab === 'song' ? <SongRankingTab songs={songRanking} /> : <ArtistRankingTab artists={artistRanking} songs={songs} />}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="p-4">
+                        <LikeRankingTab requests={requestRanking} />
+                    </div>
+                )}
             </div>
         </div>
     );

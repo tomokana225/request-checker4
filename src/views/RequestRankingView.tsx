@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { RequestRankingItem } from '../types';
-import { HeartIcon, YouTubeIcon, DocumentTextIcon, CloudUploadIcon, ExternalLinkIcon } from '../components/ui/Icons';
+import { HeartIcon, CloudUploadIcon, ExternalLinkIcon } from '../components/ui/Icons';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { containsNGWord } from '../utils/validation';
 
 interface RequestRankingViewProps {
-    rankingList: RequestRankingItem[];
     logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     refreshRankings: () => void;
 }
@@ -86,69 +84,20 @@ const RequestForm: React.FC<{
 };
 
 
-export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ rankingList, logRequest, refreshRankings }) => {
-    const [expandedItem, setExpandedItem] = useState<string | null>(null);
-
-    const getMedal = (rank: number) => {
-        if (rank === 1) return '🥇';
-        if (rank === 2) return '🥈';
-        if (rank === 3) return '🥉';
-        return <span className="font-bold text-gray-500 dark:text-gray-400">{rank}</span>;
-    };
-    
-    const ActionButton: React.FC<{ href: string, title: string, icon: React.ReactNode }> = ({ href, title, icon }) => (
-        <a href={href} target="_blank" rel="noopener noreferrer" title={title} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors">
-            {icon}
-        </a>
-    );
-
+export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ logRequest, refreshRankings }) => {
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
             <h2 className="text-3xl font-bold text-center mb-2 flex items-center justify-center gap-3">
                 <HeartIcon className="w-8 h-8 text-pink-500 dark:text-pink-400"/>
-                リクエスト
+                曲のリクエスト
             </h2>
              <p className="text-center text-gray-500 dark:text-gray-400 mb-8 text-sm">
                 リストにない曲はこちらからリクエストできます。
+                <br />
+                送信されたリクエストは「ランキング」ページの「いいね数ランキング」に反映されます。
             </p>
             
             <RequestForm logRequest={logRequest} refreshRankings={refreshRankings} />
-            
-            <h3 className="text-xl font-bold text-center my-8">現在のリクエストランキング</h3>
-
-            {rankingList.length > 0 ? (
-                <div className="space-y-3">
-                    {rankingList.map((item, index) => {
-                        const isExpanded = expandedItem === item.id;
-                        const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(item.id)}`;
-                        const printGakufuUrl = `https://www.print-gakufu.com/search/result/keyword__${encodeURIComponent(item.id)}/`;
-
-                        return (
-                            <div key={item.id} className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-md overflow-hidden">
-                                <div className="flex items-center justify-between">
-                                    <button onClick={() => setExpandedItem(isExpanded ? null : item.id)} className="flex items-center gap-3 flex-grow min-w-0 text-left">
-                                        <div className="text-xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
-                                        <div className="flex-grow min-w-0">
-                                            <h3 className="font-bold text-base text-gray-900 dark:text-white">{item.id}</h3>
-                                        </div>
-                                    </button>
-                                    <div className="flex items-center gap-3 ml-2 flex-shrink-0">
-                                        <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />} />
-                                        <ActionButton href={printGakufuUrl} title="ぷりんと楽譜で検索" icon={<DocumentTextIcon className="w-5 h-5" />} />
-                                    </div>
-                                </div>
-                                {isExpanded && (
-                                    <div className="pl-11 pt-2 animate-fade-in">
-                                        <p className="text-base font-semibold text-pink-600 dark:text-pink-400">いいね数: {item.count}票</p>
-                                    </div>
-                                )}
-                            </div>
-                        )
-                    })}
-                </div>
-            ) : (
-                <p className="text-center text-gray-500 dark:text-gray-400 mt-8">まだリクエストはありません。</p>
-            )}
         </div>
     );
 };
