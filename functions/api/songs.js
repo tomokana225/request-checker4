@@ -4,7 +4,7 @@
 
 import { initializeApp, getApps } from 'firebase/app';
 // Use the "lite" version of Firestore for serverless environments to avoid timeouts
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc } from 'firebase/firestore/lite';
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, query, where, orderBy, deleteDoc, limit } from 'firebase/firestore/lite';
 
 // Default song list to be used if Firestore is empty
 const PLAYABLE_SONGS_EXAMPLE_STR = "夜に駆ける,YOASOBI,J-Pop,new\nPretender,Official髭男dism (オフィシャルヒゲダンディズム),J-Pop\nLemon,米津玄師,J-Pop\n紅蓮華,LiSA,Anime\nドライフラワー,優里,J-Pop\n白日,King Gnu (キングヌー),J-Rock\nマリーゴールド,あいみょん,J-Pop\n猫,DISH//,J-Rock\nうっせぇわ,Ado,J-Pop\n廻廻奇譚,Eve,Anime\n炎,LiSA,Anime\nCry Baby,Official髭男dism (オフィシャルヒゲダンディズム),Anime\nアイドル,YOASOBI,Anime,new\nKICK BACK,米津玄師,Anime\n新時代,Ado,Anime\n旅路,藤井風,J-Pop\n何なんw,藤井風,J-Pop\ngrace,藤井風,J-Pop\nきらり,藤井風,J-Pop\nSubtitle,Official髭男dism (オフィシャルヒゲダンディズム),J-Pop\n怪獣の花唄,Vaundy,J-Rock\nミックスナッツ,Official髭男dism (オフィシャルヒゲダンディズム),Anime\n水平線,back number,J-Pop\nシンデレラボーイ,Saucy Dog,J-Rock\nなんでもないや,RADWIMPS,Anime\nひまわりの約束,秦基博,J-Pop\nHANABI,Mr.Children,J-Pop\n天体観測,BUMP OF CHICKEN,J-Rock\n残酷な天使のテーゼ,高橋洋子,Anime\n千本桜,黒うさP,Vocaloid,,練習中";
@@ -125,7 +125,10 @@ export async function onRequest(context) {
                     const postsRef = collection(db, 'blogPosts');
                     const q = query(postsRef, where('isPublished', '==', true), orderBy('createdAt', 'desc'));
                     const querySnapshot = await getDocs(q);
-                    const posts = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    const now = Date.now();
+                    const posts = querySnapshot.docs
+                        .map(d => ({ id: d.id, ...d.data() }))
+                        .filter(p => p.createdAt <= now); // Filter out future scheduled posts
                     return jsonResponse(posts);
                 }
                 case 'getAdminBlogPosts': {
@@ -141,6 +144,13 @@ export async function onRequest(context) {
                     const querySnapshot = await getDocs(q);
                     const suggestions = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                     return jsonResponse(suggestions);
+                }
+                case 'getRecentRequests': {
+                    const requestsRef = collection(db, 'songRequests');
+                    const q = query(requestsRef, orderBy('lastRequestedAt', 'desc'), limit(20));
+                    const querySnapshot = await getDocs(q);
+                    const requests = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    return jsonResponse(requests);
                 }
                 default: { // Original song list GET logic
                     const songDocRef = doc(db, 'songlist/default');
@@ -170,7 +180,7 @@ export async function onRequest(context) {
                     
                     const dataToSave = {
                         ...postData,
-                        createdAt: id ? postData.createdAt : Date.now(),
+                        createdAt: postData.createdAt || Date.now(),
                         updatedAt: Date.now(),
                     };
                     

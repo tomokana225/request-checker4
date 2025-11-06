@@ -21,7 +21,7 @@ import {
 
 const App: React.FC = () => {
     const { 
-        songs, songRankingList, artistRankingList, requestRankingList, posts, adminPosts, uiConfig, setlistSuggestions,
+        songs, songRankingList, artistRankingList, requestRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
         isLoading, error, rankingPeriod, setRankingPeriod,
         onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
         logSearch, logRequest, saveSetlistSuggestion, refreshRankings
@@ -86,11 +86,11 @@ const App: React.FC = () => {
             case 'search':
                 return <SearchView songs={songs} logSearch={logSearch} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} setIsAdminModalOpen={setIsAdminModalOpen} />;
             case 'list':
-                return <ListView songs={songs} />;
+                return <ListView songs={songs} logRequest={logRequest} refreshRankings={refreshRankings} />;
             case 'ranking':
-                return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} requestRanking={requestRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
+                return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
-                return <RequestRankingView logRequest={logRequest} refreshRankings={refreshRankings} />;
+                return <RequestRankingView recentRequests={recentRequests} logRequest={logRequest} refreshRankings={refreshRankings} />;
             case 'news':
                 return <BlogView posts={posts} />;
             case 'setlist':

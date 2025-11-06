@@ -35,6 +35,7 @@ export const useApi = () => {
     const [songRankingList, setSongRankingList] = useState<RankingItem[]>([]);
     const [artistRankingList, setArtistRankingList] = useState<ArtistRankingItem[]>([]);
     const [requestRankingList, setRequestRankingList] = useState<RequestRankingItem[]>([]);
+    const [recentRequests, setRecentRequests] = useState<RequestRankingItem[]>([]);
     const [posts, setPosts] = useState<BlogPost[]>([]);
     const [adminPosts, setAdminPosts] = useState<BlogPost[]>([]); // For admin panel
     const [uiConfig, setUiConfig] = useState<UiConfig>(DEFAULT_UI_CONFIG);
@@ -75,15 +76,17 @@ export const useApi = () => {
                 adminPostsRes,
                 uiConfigRes,
                 setlistSuggestionsRes,
+                recentRequestsRes,
             ] = await Promise.all([
                 fetch('/api/songs'),
                 fetch('/api/songs?action=getBlogPosts'),
                 fetch('/api/songs?action=getAdminBlogPosts'),
                 fetch('/api/songs?action=getUiConfig'),
                 fetch('/api/songs?action=getSetlistSuggestions'),
+                fetch('/api/songs?action=getRecentRequests'),
             ]);
             
-            if (!songsRes.ok || !postsRes.ok || !uiConfigRes.ok || !adminPostsRes.ok || !setlistSuggestionsRes.ok) {
+            if (!songsRes.ok || !postsRes.ok || !uiConfigRes.ok || !adminPostsRes.ok || !setlistSuggestionsRes.ok || !recentRequestsRes.ok) {
                 throw new Error('Failed to fetch initial data');
             }
 
@@ -92,6 +95,7 @@ export const useApi = () => {
             const adminPostsData = await adminPostsRes.json();
             const uiConfigData = await uiConfigRes.json();
             const setlistSuggestionsData = await setlistSuggestionsRes.json();
+            const recentRequestsData = await recentRequestsRes.json();
             
             setRawSongList(songsData.list || '');
             setSongs(parseSongs(songsData.list || ''));
@@ -99,6 +103,7 @@ export const useApi = () => {
             setAdminPosts(adminPostsData || []);
             setUiConfig(uiConfigData || DEFAULT_UI_CONFIG);
             setSetlistSuggestions(setlistSuggestionsData || []);
+            setRecentRequests(recentRequestsData || []);
             
             await fetchRankings('all'); // Fetch initial (all-time) rankings
             
@@ -189,6 +194,15 @@ export const useApi = () => {
 
     const refreshRankings = useCallback(async () => {
         await fetchRankings(rankingPeriod);
+        try {
+            const res = await fetch('/api/songs?action=getRecentRequests');
+            if (res.ok) {
+                const data = await res.json();
+                setRecentRequests(data || []);
+            }
+        } catch (err) {
+            console.error("Failed to refetch recent requests", err);
+        }
     }, [rankingPeriod, fetchRankings]);
 
 
@@ -198,6 +212,7 @@ export const useApi = () => {
         songRankingList,
         artistRankingList,
         requestRankingList,
+        recentRequests,
         posts,
         adminPosts,
         uiConfig,

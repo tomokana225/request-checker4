@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { HeartIcon, CloudUploadIcon, ExternalLinkIcon } from '../components/ui/Icons';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { containsNGWord } from '../utils/validation';
+import { RequestRankingItem } from '../types';
 
 interface RequestRankingViewProps {
+    recentRequests: RequestRankingItem[];
     logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     refreshRankings: () => void;
 }
@@ -83,8 +85,41 @@ const RequestForm: React.FC<{
     );
 };
 
+const RecentRequestsList: React.FC<{ requests: RequestRankingItem[] }> = ({ requests }) => {
+    const formatDate = (timestamp?: number) => {
+        if (!timestamp) return '';
+        const date = new Date(timestamp);
+        return date.toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    };
 
-export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ logRequest, refreshRankings }) => {
+    return (
+        <div className="mt-12">
+            <h3 className="text-xl font-bold text-center mb-4">最近のリクエスト</h3>
+            {requests && requests.length > 0 ? (
+                <div className="space-y-3">
+                    {requests.map((req) => (
+                        <div key={`${req.id}-${req.lastRequestedAt}`} className="bg-white dark:bg-gray-800/50 p-3 rounded-lg flex justify-between items-center text-sm">
+                            <div>
+                                <p className="font-semibold text-gray-800 dark:text-gray-200">{req.id}</p>
+                                {req.artist && <p className="text-xs text-gray-500 dark:text-gray-400">{req.artist}</p>}
+                            </div>
+                            <div className="text-right text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
+                                <p>{req.lastRequester}</p>
+                                <p className="text-xs">{formatDate(req.lastRequestedAt)}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-8 bg-gray-100 dark:bg-gray-800/20 rounded-lg">
+                    <p className="text-gray-500 dark:text-gray-400">まだリクエストはありません。</p>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ recentRequests, logRequest, refreshRankings }) => {
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
             <h2 className="text-3xl font-bold text-center mb-2 flex items-center justify-center gap-3">
@@ -93,11 +128,11 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ logReque
             </h2>
              <p className="text-center text-gray-500 dark:text-gray-400 mb-8 text-sm">
                 リストにない曲はこちらからリクエストできます。
-                <br />
-                送信されたリクエストは「ランキング」ページの「いいね数ランキング」に反映されます。
             </p>
             
             <RequestForm logRequest={logRequest} refreshRankings={refreshRankings} />
+
+            <RecentRequestsList requests={recentRequests} />
         </div>
     );
 };

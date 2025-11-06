@@ -28,6 +28,8 @@ export interface RequestRankingItem {
     id: string; // requested song title
     count: number;
     artist?: string;
+    lastRequester?: string;
+    lastRequestedAt?: number;
 }
 
 export interface BlogPost {

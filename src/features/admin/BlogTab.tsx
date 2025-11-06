@@ -9,6 +9,27 @@ interface BlogTabProps {
     onDeletePost: (id: string) => Promise<boolean>;
 }
 
+// timestamp to YYYY-MM-DDTHH:mm format for datetime-local input
+const formatTimestampForInput = (ts?: number): string => {
+    if (!ts) return '';
+    const d = new Date(ts);
+    // Adjust for timezone offset to display local time correctly in the input
+    const tzo = -d.getTimezoneOffset();
+    const dif = tzo >= 0 ? '+' : '-';
+    const pad = (num: number) => (num < 10 ? '0' : '') + num;
+
+    return d.getFullYear() +
+        '-' + pad(d.getMonth() + 1) +
+        '-' + pad(d.getDate()) +
+        'T' + pad(d.getHours()) +
+        ':' + pad(d.getMinutes());
+};
+
+// YYYY-MM-DDTHH:mm string to timestamp
+const parseInputToTimestamp = (str: string): number => {
+    return new Date(str).getTime();
+};
+
 export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePost }) => {
     const [selectedPost, setSelectedPost] = useState<Partial<BlogPost> | null>(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -36,7 +57,7 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
     };
 
     const handleNewPost = () => {
-        setSelectedPost({ title: '', content: '', isPublished: false, imageUrl: '' });
+        setSelectedPost({ title: '', content: '', isPublished: false, imageUrl: '', createdAt: Date.now() });
         setSaveStatus('idle');
     };
 
@@ -131,6 +152,17 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">タイトル</label>
                                 <input type="text" name="title" value={selectedPost.title || ''} onChange={handleInputChange} className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">公開日時</label>
+                                <input
+                                    type="datetime-local"
+                                    name="createdAt"
+                                    value={formatTimestampForInput(selectedPost.createdAt)}
+                                    onChange={(e) => setSelectedPost(prev => ({ ...prev, createdAt: parseInputToTimestamp(e.target.value) }))}
+                                    className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm p-2 focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]"
+                                />
+                                <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">未来の日時を設定すると、その時間になるまでお知らせに表示されません。</p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">内容 (Markdown対応)</label>

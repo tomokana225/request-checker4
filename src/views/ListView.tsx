@@ -5,6 +5,8 @@ import { SongCard } from '../components/ui/SongCard';
 
 interface ListViewProps {
     songs: Song[];
+    logRequest: (term: string, artist: string, requester: string) => Promise<void>;
+    refreshRankings: () => void;
 }
 
 type ViewState =
@@ -14,8 +16,11 @@ type ViewState =
     { mode: 'by_artist', artist: string } |
     { mode: 'by_genre', genre: string };
 
-export const ListView: React.FC<ListViewProps> = ({ songs }) => {
+export const ListView: React.FC<ListViewProps> = ({ songs, logRequest, refreshRankings }) => {
     const [viewState, setViewState] = useState<ViewState>({ mode: 'all' });
+    const [isLiking, setIsLiking] = useState<string | null>(null);
+    const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
+    const [likeMessage, setLikeMessage] = useState('');
 
     // FIX: Explicitly type sort callback parameters 'a' and 'b' as strings to prevent them from being inferred as 'unknown'.
     const artists = useMemo(() => [...new Set(songs.map(s => s.artist))].sort((a: string, b: string) => a.localeCompare(b, 'ja')), [songs]);
@@ -48,8 +53,35 @@ export const ListView: React.FC<ListViewProps> = ({ songs }) => {
             setViewState({ mode: 'genre_select' });
         }
     };
+
+    const showLikeMessage = (msg: string) => {
+        setLikeMessage(msg);
+        setTimeout(() => setLikeMessage(''), 3000);
+    };
+
+    const handleLike = async (song: Song) => {
+        if (likedSongs.has(song.title)) return; // Already liked this session
+
+        setIsLiking(song.title);
+        await logRequest(song.title, song.artist, ''); // Log anonymously with artist
+        setLikedSongs(prev => new Set(prev).add(song.title));
+        await refreshRankings();
+        setIsLiking(null);
+        showLikeMessage(`「${song.title}」にいいねしました！`);
+    };
     
     const renderContent = () => {
+        const songCards = (songsToRender: Song[]) => (
+            songsToRender.map((song, index) => 
+                <SongCard 
+                    key={`${song.title}-${index}`} 
+                    song={song}
+                    onLike={handleLike}
+                    isLiking={isLiking === song.title}
+                    isLiked={likedSongs.has(song.title)}
+                />)
+        );
+
         switch (viewState.mode) {
             case 'artist_select':
                 return (
@@ -77,21 +109,21 @@ export const ListView: React.FC<ListViewProps> = ({ songs }) => {
                 const songsByArtist = songs.filter(s => s.artist === viewState.artist).sort((a, b) => a.title.localeCompare(b.title, 'ja'));
                 return (
                     <div className="space-y-3">
-                         {songsByArtist.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} />)}
+                         {songCards(songsByArtist)}
                     </div>
                 );
              case 'by_genre':
                 const songsByGenre = songs.filter(s => s.genre === viewState.genre).sort((a, b) => a.title.localeCompare(b.title, 'ja'));
                 return (
                     <div className="space-y-3">
-                         {songsByGenre.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} />)}
+                         {songCards(songsByGenre)}
                     </div>
                 );
             case 'all':
             default:
                 return (
                      <div className="space-y-3">
-                        {sortedSongs.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} />)}
+                        {songCards(sortedSongs)}
                     </div>
                 );
         }
@@ -121,6 +153,7 @@ export const ListView: React.FC<ListViewProps> = ({ songs }) => {
                     <ModeButton mode="genre_select" label="ジャンル別" />
                 </div>
                  <p className="text-center text-gray-500 dark:text-gray-400 mt-4">{countLabel}</p>
+                 {likeMessage && <p className="text-center text-green-500 dark:text-green-400 h-6 mt-2 flex items-center justify-center">{likeMessage}</p>}
              </div>
              
              {(viewState.mode === 'by_artist' || viewState.mode === 'by_genre') && (
