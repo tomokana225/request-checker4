@@ -1,9 +1,9 @@
-// FIX: Changed to a namespace import to resolve Firebase module errors, as named imports were failing.
-import * as firebase from 'firebase/app';
+// FIX: Use named imports for Firebase v9+ modular SDK compatibility.
+import { initializeApp, getApps } from 'firebase/app';
 
 const initializeFirebase = async () => {
-  // FIX: Use `firebase.getApps()` with the namespace import.
-  if (firebase.getApps().length > 0) {
+  // FIX: Call getApps() directly as a function.
+  if (getApps().length > 0) {
     // Firebase is already initialized, do nothing.
     return;
   }
@@ -18,8 +18,8 @@ const initializeFirebase = async () => {
       console.error("Firebase config is missing API key. Firebase will not be initialized.");
       return;
     }
-    // FIX: Use `firebase.initializeApp()` with the namespace import.
-    firebase.initializeApp(firebaseConfig);
+    // FIX: Call initializeApp() directly as a function.
+    initializeApp(firebaseConfig);
   } catch (error) {
     console.error("Firebase initialization error:", error);
     return;
