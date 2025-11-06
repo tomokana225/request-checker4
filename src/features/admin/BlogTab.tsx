@@ -14,7 +14,6 @@ const formatTimestampForInput = (ts?: number): string => {
     if (!ts) return '';
     const d = new Date(ts);
     // Adjust for timezone offset to display local time correctly in the input
-    const tzo = -d.getTimezoneOffset();
     const pad = (num: number) => (num < 10 ? '0' : '') + num;
 
     return d.getFullYear() +
