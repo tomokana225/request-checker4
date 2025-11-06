@@ -21,7 +21,7 @@ import {
 
 const App: React.FC = () => {
     const { 
-        songs, songRankingList, artistRankingList, requestRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
+        songs, songRankingList, artistRankingList, posts, adminPosts, uiConfig, setlistSuggestions, recentRequests,
         isLoading, error, rankingPeriod, setRankingPeriod,
         onSaveSongs, onSaveUiConfig, onSavePost, onDeletePost,
         logSearch, logRequest, saveSetlistSuggestion, refreshRankings
