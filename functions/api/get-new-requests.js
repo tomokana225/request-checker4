@@ -2,7 +2,7 @@
 // It retrieves a list of songs requested via the form (not "likes").
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore/lite';
+import { getFirestore, collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',

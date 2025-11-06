@@ -1,8 +1,9 @@
-// FIX: Switch to compat library to resolve module resolution error for initializeApp and getApps.
-import firebase from 'firebase/compat/app';
+import firebase from 'firebase/app';
 
 const initializeFirebase = async () => {
   // Check if Firebase has already been initialized to avoid re-initialization errors.
+  // FIX: Switched to Firebase v8 syntax to resolve import errors.
+  // The client-side environment appears to be using an older version of the Firebase SDK.
   if (firebase.apps.length > 0) {
     return;
   }
@@ -22,7 +23,7 @@ const initializeFirebase = async () => {
       return; // Stop initialization if config is bad.
     }
 
-    // Initialize Firebase with the fetched configuration.
+    // Initialize Firebase with the fetched configuration using the correct v8 function.
     firebase.initializeApp(firebaseConfig);
 
   } catch (error) {
