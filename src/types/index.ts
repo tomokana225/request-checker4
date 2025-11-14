@@ -1,8 +1,9 @@
-
 // --- TYPE DEFINITIONS ---
 export interface Song {
   title: string;
   artist: string;
+  titleKana?: string;
+  artistKana?: string;
   genre: string;
   isNew: boolean;
   status: 'playable' | 'practicing';
@@ -75,6 +76,10 @@ export interface UiConfig {
     bodyFontFamily: string;
     headingFontScale: number;
     bodyFontScale: number;
+    specialButtons: {
+        twitcas: NavButtonConfig;
+        support: NavButtonConfig;
+    };
     navButtons: {
         search: NavButtonConfig;
         printGakufu: NavButtonConfig;

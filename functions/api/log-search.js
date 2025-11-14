@@ -32,15 +32,32 @@ async function getFirebaseApp(env) {
     return initializeApp(firebaseConfig);
 }
 
+const extractKana = (text) => {
+    const match = text.match(/(.+?)\s*[(（](.+?)[)）]/);
+    if (match) {
+        return {
+            main: match[1].trim(),
+            kana: match[2].trim()
+        };
+    }
+    return { main: text.trim() };
+};
+
 const parseSongs = (str) => {
     if (!str) return [];
     return str.replace(/\r\n/g, '\n').split('\n').map(line => {
         if (!line.trim()) return null;
         const parts = line.split(',');
         if (parts.length < 2 || !parts[0] || !parts[1]) return null;
+        
+        const titleParts = extractKana(parts[0]);
+        const artistParts = extractKana(parts[1]);
+
         return {
-            title: parts[0].trim(),
-            artist: parts[1].trim(),
+            title: titleParts.main,
+            artist: artistParts.main,
+            titleKana: titleParts.kana,
+            artistKana: artistParts.kana,
             genre: parts[2]?.trim() || '',
             isNew: parts[3]?.trim()?.toLowerCase() === 'new',
             status: parts[4]?.trim()?.toLowerCase() === '練習中' ? 'practicing' : 'playable',
@@ -106,15 +123,23 @@ export async function onRequest(context) {
         let highestScore = -1;
 
         const calculateScore = (song, term) => {
-            const songTitle = normalizeForSearch(song.title);
-            const songArtist = normalizeForSearch(song.artist);
+            const normalizedTitle = normalizeForSearch(song.title);
+            const normalizedArtist = normalizeForSearch(song.artist);
+            const normalizedTitleKana = normalizeForSearch(song.titleKana || '');
+            const normalizedArtistKana = normalizeForSearch(song.artistKana || '');
             let score = 0;
-            if (songTitle === term) score = 100;
-            else if (songArtist === term) score = 90;
-            else if (songTitle.startsWith(term)) score = 70;
-            else if (songArtist.startsWith(term)) score = 60;
-            else if (songTitle.includes(term)) score = 30;
-            else if (songArtist.includes(term)) score = 20;
+
+            if (normalizedTitle === term || normalizedTitleKana === term) return 100;
+            if (normalizedArtist === term || normalizedArtistKana === term) return 90;
+
+            if (normalizedTitle.startsWith(term) || normalizedTitleKana.startsWith(term)) score = Math.max(score, 70);
+            if (normalizedArtist.startsWith(term) || normalizedArtistKana.startsWith(term)) score = Math.max(score, 60);
+
+            if (score > 0) return score;
+
+            if (normalizedTitle.includes(term) || normalizedTitleKana.includes(term)) score = Math.max(score, 30);
+            if (normalizedArtist.includes(term) || normalizedArtistKana.includes(term)) score = Math.max(score, 20);
+            
             return score;
         };
 

@@ -18,6 +18,18 @@ const formatDate = (timestamp: number) => {
 
 type SortOrder = 'newest' | 'oldest';
 
+const SegmentedControlButton: React.FC<{ onClick: () => void, isActive: boolean, children: React.ReactNode }> = ({ onClick, isActive, children }) => {
+    return (
+        <button
+            onClick={onClick}
+            className={`px-4 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 focus:outline-none ${isActive ? 'text-white' : 'text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10'}`}
+            style={{backgroundColor: isActive ? 'var(--primary-color)' : ''}}
+        >
+            {children}
+        </button>
+    );
+};
+
 export const BlogView: React.FC<BlogViewProps> = ({ posts }) => {
     const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
     const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
@@ -44,21 +56,9 @@ export const BlogView: React.FC<BlogViewProps> = ({ posts }) => {
             <h2 className="text-3xl font-bold text-center mb-2">お知らせ</h2>
             
             <div className="flex justify-center md:justify-end mb-6">
-                <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                    <button
-                        onClick={() => setSortOrder('newest')}
-                        className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${sortOrder === 'newest' ? 'bg-cyan-500 text-white' : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
-                        style={{backgroundColor: sortOrder === 'newest' ? 'var(--primary-color)' : ''}}
-                    >
-                        新着順
-                    </button>
-                    <button
-                        onClick={() => setSortOrder('oldest')}
-                        className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${sortOrder === 'oldest' ? 'bg-cyan-500 text-white' : 'bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
-                        style={{backgroundColor: sortOrder === 'oldest' ? 'var(--primary-color)' : ''}}
-                    >
-                        古い順
-                    </button>
+                <div className="flex items-center gap-2 p-1 bg-black/5 dark:bg-white/5 rounded-full">
+                    <SegmentedControlButton onClick={() => setSortOrder('newest')} isActive={sortOrder === 'newest'}>新着順</SegmentedControlButton>
+                    <SegmentedControlButton onClick={() => setSortOrder('oldest')} isActive={sortOrder === 'oldest'}>古い順</SegmentedControlButton>
                 </div>
             </div>
 
@@ -67,7 +67,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ posts }) => {
                     {sortedPosts.map(post => (
                         <article 
                             key={post.id} 
-                            className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-transform transform hover:scale-[1.02] cursor-pointer"
+                            className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-[1.02] cursor-pointer"
                             onClick={() => setSelectedPost(post)}
                         >
                             {post.imageUrl && (
@@ -78,18 +78,20 @@ export const BlogView: React.FC<BlogViewProps> = ({ posts }) => {
                                 />
                             )}
                             <div className="p-6">
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{post.title}</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{formatDate(post.createdAt)}</p>
+                                <h3 className="text-2xl font-bold mb-2">{post.title}</h3>
+                                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">{formatDate(post.createdAt)}</p>
                                 <SimpleMarkdownRenderer content={truncateContent(post.content, 120)} />
                                 {post.content.length > 120 && (
-                                     <p className="mt-4 font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-500 dark:hover:text-cyan-300">続きを読む...</p>
+                                     <p className="mt-4 font-semibold" style={{color: 'var(--primary-color)'}}>続きを読む...</p>
                                 )}
                             </div>
                         </article>
                     ))}
                 </div>
             ) : (
-                <p className="text-center text-gray-500 dark:text-gray-400 mt-8">まだお知らせはありません。</p>
+                 <div className="text-center py-12 bg-input-bg-light dark:bg-card-background-dark/50 rounded-lg border border-border-light dark:border-border-dark">
+                    <p className="text-text-secondary-light dark:text-text-secondary-dark">まだお知らせはありません。</p>
+                </div>
             )}
 
             {selectedPost && (

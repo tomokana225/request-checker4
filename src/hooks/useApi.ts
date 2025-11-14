@@ -1,18 +1,24 @@
 
+
+
 import { useState, useEffect, useCallback } from 'react';
 import { Song, RankingItem, ArtistRankingItem, RequestRankingItem, BlogPost, UiConfig, SetlistSuggestion, RankingPeriod } from '../types';
 import { parseSongs } from '../utils/parser';
 
 // Default UI Config to prevent crashes before data loads
 const DEFAULT_UI_CONFIG: UiConfig = {
-    mainTitle: 'Song Request Search',
-    subtitle: 'Check if I can play the song or if it\'s on Print Gakufu',
+    mainTitle: 'ともかなのリクエスト曲一検索',
+    subtitle: '弾ける曲 or ぷりんと楽譜にある曲かチェックできます',
     primaryColor: '#ec4899',
+    twitcastingUrl: 'https://twitcasting.tv/g:101738740616323847745',
     xUrl: '',
-    backgroundType: 'color',
+    ofuseUrl: '',
+    doneruUrl: '',
+    amazonWishlistUrl: '',
+    backgroundType: 'image',
     backgroundColor: '#f3f4f6',
     darkBackgroundColor: '#111827',
-    backgroundImageUrl: '',
+    backgroundImageUrl: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070&auto=format&fit=crop',
     backgroundOpacity: 0.1,
     twitcastingIconUrl: '',
     xIconUrl: '',
@@ -21,14 +27,18 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     bodyFontFamily: "'Noto Sans JP', sans-serif",
     headingFontScale: 1.0,
     bodyFontScale: 1.0,
+    specialButtons: {
+        twitcas: { label: 'ツイキャス配信はこちら', enabled: true },
+        support: { label: '配信者支援', enabled: true },
+    },
     navButtons: {
-        search: { label: 'Search', enabled: true },
+        search: { label: '曲を検索', enabled: true },
         printGakufu: { label: 'ぷりんと楽譜', enabled: true },
-        list: { label: 'List', enabled: true },
-        ranking: { label: 'Ranking', enabled: true },
-        requests: { label: 'Requests', enabled: true },
+        list: { label: '曲リスト', enabled: true },
+        ranking: { label: 'ランキング', enabled: true },
         news: { label: 'お知らせ', enabled: true },
-        suggest: { label: 'Suggest', enabled: true },
+        requests: { label: 'リクエスト', enabled: true },
+        suggest: { label: 'おまかせ選曲', enabled: true },
         setlist: { label: 'セトリ提案', enabled: true },
     }
 };
@@ -47,6 +57,7 @@ export const useApi = () => {
     const [uiConfig, setUiConfig] = useState<UiConfig>(DEFAULT_UI_CONFIG);
     const [setlistSuggestions, setSetlistSuggestions] = useState<SetlistSuggestion[]>([]);
     const [rankingPeriod, setRankingPeriod] = useState<RankingPeriod>('all');
+    const [activeUserCount, setActiveUserCount] = useState(0);
 
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -88,7 +99,6 @@ export const useApi = () => {
     }, []);
 
     const fetchData = useCallback(async () => {
-        // This function fetches non-ranking data. Rankings are fetched separately.
         setIsLoading(true);
         setError(null);
         try {
@@ -133,8 +143,42 @@ export const useApi = () => {
             ]);
             
         } catch (err: any) {
-            setError(err.message);
-            console.error(err);
+            const devErrorMessage = 'サーバーからのデータ取得に失敗しました。開発用にモックデータを表示します。';
+            setError(devErrorMessage);
+            console.error("--- MOCK DATA MODE ACTIVATED ---");
+            console.error("Failed to fetch initial data. Using default mock data for development.", err);
+            
+            const mockSongList = "夜に駆ける,YOASOBI,J-Pop,new\nPretender,Official髭男dism,J-Pop\nLemon,米津玄師,J-Pop\nアイドル,YOASOBI,Anime,new\nSubtitle,Official髭男dism,J-Pop";
+            setRawSongList(mockSongList);
+            setSongs(parseSongs(mockSongList));
+            setPosts([{
+                id: 'mock-post-1',
+                title: 'ようこそ！ (開発用データ)',
+                content: 'これは開発用のモックデータです。\n\nサーバーとの通信に失敗したため、ダミーのお知らせを表示しています。\n\n* リスト項目1\n* リスト項目2\n\n[リンクの例](https://google.com)',
+                isPublished: true,
+                createdAt: Date.now(),
+                imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop'
+            }]);
+            setAdminPosts([{
+                id: 'mock-post-1',
+                title: 'ようこそ！ (開発用データ)',
+                content: 'これは開発用のモックデータです。\n\nサーバーとの通信に失敗したため、ダミーのお知らせを表示しています。',
+                isPublished: true,
+                createdAt: Date.now(),
+                imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop'
+            }]);
+            setUiConfig(DEFAULT_UI_CONFIG);
+            setSetlistSuggestions([]);
+            setRecentRequests([
+                { id: 'アイドル', count: 5, artist: 'YOASOBI', lastRequester: 'test-user-1', lastRequestedAt: Date.now() - 100000 },
+                { id: 'Lemon', count: 3, artist: '米津玄師', lastRequester: 'test-user-2', lastRequestedAt: Date.now() - 200000 },
+            ]);
+            
+            await Promise.all([
+                fetchRankings('all'), 
+                fetchLikeRankings('all')
+            ]);
+
         } finally {
             setIsLoading(false);
         }
@@ -150,6 +194,55 @@ export const useApi = () => {
             fetchLikeRankings(rankingPeriod);
         }
     }, [rankingPeriod, isLoading, fetchRankings, fetchLikeRankings]);
+
+    // Presence logic to count active users
+    useEffect(() => {
+        let clientId = localStorage.getItem('clientId');
+        if (!clientId) {
+            try {
+                clientId = crypto.randomUUID();
+                localStorage.setItem('clientId', clientId);
+            } catch (e) {
+                console.error("crypto.randomUUID() is not available. Using a fallback.");
+                clientId = `fallback-${Date.now()}-${Math.random()}`;
+                localStorage.setItem('clientId', clientId);
+            }
+        }
+
+        const reportPresence = () => {
+            if (document.visibilityState === 'visible') {
+                fetch('/api/presence', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clientId }),
+                    keepalive: true // Allows the request to be sent even if the page is being closed
+                }).catch(console.error);
+            }
+        };
+
+        const fetchActiveUsers = () => {
+             if (document.visibilityState === 'visible') {
+                fetch('/api/get-active-users')
+                    .then(res => res.ok ? res.json() : Promise.reject(res))
+                    .then(data => setActiveUserCount(data.count || 0))
+                    .catch(console.error);
+            }
+        };
+
+        reportPresence();
+        fetchActiveUsers();
+
+        const presenceInterval = setInterval(reportPresence, 60 * 1000); // every 1 minute
+        const fetchInterval = setInterval(fetchActiveUsers, 60 * 1000); // every 1 minute
+        
+        document.addEventListener('visibilitychange', reportPresence);
+
+        return () => {
+            clearInterval(presenceInterval);
+            clearInterval(fetchInterval);
+            document.removeEventListener('visibilitychange', reportPresence);
+        };
+    }, []);
 
     const postData = useCallback(async (url: string, body: object) => {
         try {
@@ -252,6 +345,7 @@ export const useApi = () => {
         setlistSuggestions,
         isLoading,
         error,
+        activeUserCount,
         rankingPeriod,
         setRankingPeriod,
         onSaveSongs,

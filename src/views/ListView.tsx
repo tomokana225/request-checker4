@@ -22,9 +22,7 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
     const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
     const [likeMessage, setLikeMessage] = useState('');
 
-    // FIX: Explicitly type sort callback parameters 'a' and 'b' as strings to prevent them from being inferred as 'unknown'.
     const artists = useMemo(() => [...new Set(songs.map(s => s.artist))].sort((a: string, b: string) => a.localeCompare(b, 'ja')), [songs]);
-    // FIX: Explicitly type sort callback parameters 'a' and 'b' as strings to prevent them from being inferred as 'unknown'.
     const genres = useMemo(() => [...new Set(songs.map(s => s.genre).filter(Boolean))].sort((a: string, b: string) => a.localeCompare(b, 'ja')), [songs]);
     const sortedSongs = useMemo(() => [...songs].sort((a, b) => a.title.localeCompare(b.title, 'ja')), [songs]);
 
@@ -87,9 +85,9 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
                 return (
                     <div className="space-y-2">
                         {artists.map(artist => (
-                             <div key={artist} onClick={() => setViewState({ mode: 'by_artist', artist })} className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-sm">
+                             <div key={artist} onClick={() => setViewState({ mode: 'by_artist', artist })} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark p-3 sm:p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                                 <span className="font-semibold">{artist}</span>
-                                <ChevronRightIcon className="w-5 h-5 text-gray-400" />
+                                <ChevronRightIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
                             </div>
                         ))}
                     </div>
@@ -98,9 +96,9 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
                 return (
                     <div className="space-y-2">
                         {genres.map(genre => (
-                             <div key={genre} onClick={() => setViewState({ mode: 'by_genre', genre })} className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-sm">
+                             <div key={genre} onClick={() => setViewState({ mode: 'by_genre', genre })} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark p-3 sm:p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                                 <span className="font-semibold">{genre}</span>
-                                <ChevronRightIcon className="w-5 h-5 text-gray-400" />
+                                <ChevronRightIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
                             </div>
                         ))}
                     </div>
@@ -136,7 +134,7 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
         return (
             <button
                 onClick={() => setViewState({ mode: mode as any })}
-                className={`px-4 py-2 rounded-full text-sm font-semibold transition ${isActive ? 'bg-cyan-500 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition ${isActive ? 'text-white' : 'bg-transparent text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10'}`}
                 style={{backgroundColor: isActive ? 'var(--primary-color)' : ''}}
             >
                 {label}
@@ -147,22 +145,22 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
              <div className="mb-6">
-                <div className="flex justify-center gap-4">
+                <div className="flex justify-center items-center p-1 rounded-full bg-black/5 dark:bg-white/5 max-w-sm mx-auto">
                     <ModeButton mode="all" label="曲名順" />
                     <ModeButton mode="artist_select" label="アーティスト別" />
                     <ModeButton mode="genre_select" label="ジャンル別" />
                 </div>
-                 <p className="text-center text-gray-500 dark:text-gray-400 mt-4">{countLabel}</p>
-                 {likeMessage && <p className="text-center text-green-500 dark:text-green-400 h-6 mt-2 flex items-center justify-center">{likeMessage}</p>}
+                 <p className="text-center text-text-secondary-light dark:text-text-secondary-dark mt-4">{countLabel}</p>
+                 {likeMessage && <p className="text-center text-green-500 h-6 mt-2 flex items-center justify-center">{likeMessage}</p>}
              </div>
              
              {(viewState.mode === 'by_artist' || viewState.mode === 'by_genre') && (
                 <div className="mb-4">
-                    <button onClick={handleBack} className="flex items-center gap-2 text-sm text-cyan-500 dark:text-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-300 font-semibold mb-2">
+                    <button onClick={handleBack} className="flex items-center gap-2 text-sm font-semibold mb-2" style={{color: 'var(--primary-color)'}}>
                         <ChevronLeftIcon className="w-4 h-4" />
                         <span>{viewState.mode === 'by_artist' ? 'アーティスト一覧に戻る' : 'ジャンル一覧に戻る'}</span>
                     </button>
-                    <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
+                    <h2 className="text-2xl font-bold text-center">
                         {viewState.mode === 'by_artist' ? viewState.artist : viewState.genre}
                     </h2>
                 </div>

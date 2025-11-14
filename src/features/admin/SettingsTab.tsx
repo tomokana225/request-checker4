@@ -77,6 +77,19 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         const { name, value } = e.target;
         setConfig(prev => ({ ...prev, [name]: Number(value) }));
     };
+    
+    const handleSpecialNavChange = (key: keyof UiConfig['specialButtons'], field: keyof NavButtonConfig, value: string | boolean) => {
+        setConfig(prev => ({
+            ...prev,
+            specialButtons: {
+                ...prev.specialButtons,
+                [key]: {
+                    ...prev.specialButtons[key],
+                    [field]: value
+                }
+            }
+        }));
+    };
 
     const handleNavChange = (key: keyof UiConfig['navButtons'], field: keyof NavButtonConfig, value: string | boolean) => {
         setConfig(prev => ({
@@ -148,6 +161,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                  <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ツイキャスアイコンURL</label>
                     <input type="text" name="twitcastingIconUrl" value={config.twitcastingIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURLを入力します。空の場合、デフォルトのツイキャスアイコンが表示されます。</p>
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">X (Twitter) URL</label>
@@ -156,6 +170,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                  <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">X (Twitter) アイコンURL</label>
                     <input type="text" name="xIconUrl" value={config.xIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURLを入力します。空の場合、デフォルトのXアイコンが表示されます。</p>
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">テーマカラー</label>
@@ -266,7 +281,28 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                  <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">サポートボタン アイコンURL</label>
                     <input type="text" name="supportIconUrl" value={config.supportIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURLを入力します。空の場合、デフォルトのハートアイコンが表示されます。</p>
                 </div>
+            </div>
+            
+            <h3 className="text-lg font-semibold mb-4 mt-8">特別ボタン設定</h3>
+            <div className="space-y-3">
+                {config.specialButtons?.twitcas && (
+                    <div key="twitcas" className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
+                        <input type="checkbox" checked={config.specialButtons.twitcas.enabled} onChange={(e) => handleSpecialNavChange('twitcas', 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
+                        <div className="flex-grow">
+                             <input type="text" value={config.specialButtons.twitcas.label} onChange={(e) => handleSpecialNavChange('twitcas', 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
+                        </div>
+                    </div>
+                )}
+                 {config.specialButtons?.support && (
+                    <div key="support" className="bg-white dark:bg-gray-800 p-3 rounded-md flex items-center gap-4">
+                        <input type="checkbox" checked={config.specialButtons.support.enabled} onChange={(e) => handleSpecialNavChange('support', 'enabled', e.target.checked)} className="form-checkbox h-5 w-5 text-cyan-600 bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-cyan-500" />
+                        <div className="flex-grow">
+                             <input type="text" value={config.specialButtons.support.label} onChange={(e) => handleSpecialNavChange('support', 'label', e.target.value)} className="w-full bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-[var(--primary-color)]" />
+                        </div>
+                    </div>
+                )}
             </div>
 
             <h3 className="text-lg font-semibold mb-4 mt-8">ナビゲーションボタン設定</h3>

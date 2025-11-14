@@ -79,28 +79,28 @@ export const SuggestSongModal: React.FC<SuggestSongModalProps> = ({ isOpen, onCl
     const displaySong = flickerSong || suggestedSong;
     
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-md text-center p-8 relative" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 dark:hover:text-white" disabled={gamePhase === 'spinning'}>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+            <div className="bg-card-background-light dark:bg-card-background-dark rounded-lg shadow-2xl w-full max-w-md text-center p-8 relative" onClick={e => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-4 right-4 text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark" disabled={gamePhase === 'spinning'}>
                     <XIcon className="w-6 h-6" />
                 </button>
-                <h2 className="text-2xl font-bold mb-4 dark:text-white">ランダムルーレット</h2>
+                <h2 className="text-2xl font-bold mb-4">ランダムルーレット</h2>
                 
                 {/* Slot machine UI */}
-                <div className="h-32 w-full flex items-center justify-center p-4 my-6 text-center">
+                <div className="h-32 w-full flex items-center justify-center p-4 my-6 text-center bg-gray-200 dark:bg-gray-900 rounded-lg border border-border-light dark:border-border-dark">
                     {gamePhase === 'idle' && (
-                        <p className="text-xl text-gray-500 dark:text-gray-400">何にする？</p>
+                        <p className="text-xl text-text-secondary-light dark:text-text-secondary-dark">何にする？</p>
                     )}
                     {gamePhase === 'spinning' && displaySong && (
                         <div className="animate-slot-flicker">
                             <h3 className="text-3xl font-bold" style={{color: 'var(--primary-color)'}}>{displaySong.title}</h3>
-                            <p className="text-lg text-gray-700 dark:text-gray-300">{displaySong.artist}</p>
+                            <p className="text-lg text-text-primary-light dark:text-text-primary-dark">{displaySong.artist}</p>
                         </div>
                     )}
                     {gamePhase === 'result' && displaySong && (
                          <div className="animate-slot-result-pop">
                              <h3 className="text-4xl font-bold" style={{color: 'var(--primary-color)'}}>{displaySong.title}</h3>
-                            <p className="text-xl text-gray-700 dark:text-gray-300">{displaySong.artist}</p>
+                            <p className="text-xl text-text-primary-light dark:text-text-primary-dark">{displaySong.artist}</p>
                         </div>
                     )}
                 </div>
@@ -109,10 +109,10 @@ export const SuggestSongModal: React.FC<SuggestSongModalProps> = ({ isOpen, onCl
                 <div className="h-10 mb-4">
                     {gamePhase === 'result' && suggestedSong && (
                         <div className="flex items-center justify-center gap-4 animate-fade-in">
-                             <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${suggestedSong.artist} ${suggestedSong.title}`)}`} target="_blank" rel="noopener noreferrer" title="YouTubeで検索" className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors">
+                             <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${suggestedSong.artist} ${suggestedSong.title}`)}`} target="_blank" rel="noopener noreferrer" title="YouTubeで検索" className="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors">
                                 <YouTubeIcon className="w-6 h-6 text-red-600 hover:text-red-500" />
                             </a>
-                            <a href={`https://www.google.com/search?q=${encodeURIComponent(`${suggestedSong.artist} ${suggestedSong.title} 歌詞`)}`} target="_blank" rel="noopener noreferrer" title="歌詞を検索" className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors">
+                            <a href={`https://www.google.com/search?q=${encodeURIComponent(`${suggestedSong.artist} ${suggestedSong.title} 歌詞`)}`} target="_blank" rel="noopener noreferrer" title="歌詞を検索" className="text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark transition-colors">
                                 <DocumentTextIcon className="w-6 h-6" />
                             </a>
                         </div>
@@ -121,15 +121,15 @@ export const SuggestSongModal: React.FC<SuggestSongModalProps> = ({ isOpen, onCl
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     {gamePhase === 'idle' ? (
-                        <button onClick={startSpin} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105">
+                        <button onClick={startSpin} className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 shadow">
                             スタート
                         </button>
                     ) : (
-                        <button onClick={startSpin} disabled={gamePhase === 'spinning'} className="bg-gray-500 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <button onClick={startSpin} disabled={gamePhase === 'spinning'} className="bg-gray-500 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow">
                             もう一回
                         </button>
                     )}
-                    <button onClick={handleCopy} disabled={gamePhase !== 'result'} className="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" style={{backgroundColor: 'var(--primary-color)'}}>
+                    <button onClick={handleCopy} disabled={gamePhase !== 'result'} className="text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow" style={{backgroundColor: 'var(--primary-color)'}}>
                         {isCopied ? 'コピーしました！' : 'この曲をコピー'}
                     </button>
                 </div>
