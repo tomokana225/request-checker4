@@ -174,7 +174,7 @@ const App: React.FC = () => {
         <>
             <div className="flex h-screen bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark">
                 {/* Overlay for slide-out menu */}
-                <div className={`fixed inset-0 bg-black/60 z-30 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
+                <div className={`fixed inset-0 bg-black/95 z-30 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
 
                 {/* Slide-out Menu */}
                 <aside className={`fixed z-40 h-full bg-card-background-light dark:bg-card-background-dark border-r border-border-light dark:border-border-dark flex flex-col transition-transform duration-300 w-64 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
@@ -244,7 +244,7 @@ const App: React.FC = () => {
                                 <span>{uiConfig.specialButtons.x.label}</span>
                             </a>
                         )}
-                         {uiConfig.specialButtons?.support?.enabled && (uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl) && (
+                         {uiConfig.specialButtons?.support?.enabled && (
                             <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm" style={{backgroundColor: 'var(--primary-color)'}}>
                                 {uiConfig.supportIconUrl ? <img src={uiConfig.supportIconUrl} alt="Support" className="w-5 h-5" /> : <HeartIcon className="w-5 h-5"/>}
                                 <span>{uiConfig.specialButtons.support.label}</span>

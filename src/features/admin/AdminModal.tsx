@@ -39,7 +39,7 @@ export const AdminModal: React.FC<AdminModalProps> = (props) => {
     );
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4" onClick={onClose}>
             <div className="bg-card-background-light dark:bg-card-background-dark rounded-lg shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
                 <header className="flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark flex-shrink-0">
                     <h2 className="text-xl font-bold">管理パネル</h2>

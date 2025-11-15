@@ -79,7 +79,7 @@ export const SuggestSongModal: React.FC<SuggestSongModalProps> = ({ isOpen, onCl
     const displaySong = flickerSong || suggestedSong;
     
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4" onClick={onClose}>
             <div className="bg-card-background-light dark:bg-card-background-dark rounded-lg shadow-2xl w-full max-w-md text-center p-8 relative" onClick={e => e.stopPropagation()}>
                 <button onClick={onClose} className="absolute top-4 right-4 text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark" disabled={gamePhase === 'spinning'}>
                     <XIcon className="w-6 h-6" />
