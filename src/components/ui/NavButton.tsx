@@ -7,19 +7,22 @@ interface NavButtonProps {
     IconComponent: React.FC<{ className?: string }>;
     label: string;
     className?: string;
+    isCollapsed?: boolean;
 }
 
-export const NavButton: React.FC<NavButtonProps> = ({ onClick, href, isActive, IconComponent, label, className }) => {
-    const baseClasses = "w-full flex items-center justify-start gap-3 px-4 py-3 rounded-lg text-base font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-card-background-light dark:focus:ring-offset-card-background-dark";
+export const NavButton: React.FC<NavButtonProps> = ({ onClick, href, isActive, IconComponent, label, className, isCollapsed }) => {
+    const baseClasses = "w-full flex items-center gap-4 px-4 py-3 rounded-lg text-base font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-card-background-light dark:focus:ring-offset-card-background-dark";
     
     const activeClasses = isActive 
         ? "text-white" 
         : "text-text-primary-light dark:text-text-primary-dark hover:bg-black/5 dark:hover:bg-white/10";
+    
+    const collapsedClasses = isCollapsed ? 'justify-center' : 'justify-start';
 
     const content = (
         <>
             <IconComponent className="w-6 h-6 flex-shrink-0" />
-            <span className="truncate">{label}</span>
+            <span className={`truncate transition-opacity duration-200 ${isCollapsed ? 'opacity-0 hidden' : 'opacity-100'}`}>{label}</span>
         </>
     );
 
@@ -29,8 +32,9 @@ export const NavButton: React.FC<NavButtonProps> = ({ onClick, href, isActive, I
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`${baseClasses} ${activeClasses} ${className}`}
+                className={`${baseClasses} ${activeClasses} ${collapsedClasses} ${className}`}
                 style={{borderColor: 'var(--primary-color)'}}
+                title={isCollapsed ? label : ''}
             >
                 {content}
             </a>
@@ -40,8 +44,9 @@ export const NavButton: React.FC<NavButtonProps> = ({ onClick, href, isActive, I
     return (
         <button
             onClick={onClick}
-            className={`${baseClasses} ${activeClasses} ${className}`}
+            className={`${baseClasses} ${activeClasses} ${collapsedClasses} ${className}`}
             style={{backgroundColor: isActive ? 'var(--primary-color)' : '', borderColor: 'var(--primary-color)'}}
+            title={isCollapsed ? label : ''}
         >
             {content}
         </button>
