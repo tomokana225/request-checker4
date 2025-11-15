@@ -16,7 +16,7 @@ import {
     SearchIcon, MusicNoteIcon, ChartBarIcon, NewspaperIcon, 
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, 
     DocumentTextIcon, CloudUploadIcon, HeartIcon, XSocialIcon, TwitcasIcon,
-    UserGroupIcon, ChevronLeftIcon, MenuAltIcon
+    UserGroupIcon, ChevronLeftIcon, XIcon
 } from './components/ui/Icons';
 
 
@@ -36,8 +36,7 @@ const App: React.FC = () => {
     const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -148,70 +147,46 @@ const App: React.FC = () => {
 
     const SidebarContent = () => (
         <>
-            <div className={`flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark ${isSidebarOpen ? 'flex' : 'hidden md:flex'}`}>
-                <h2 className={`font-bold text-lg whitespace-nowrap overflow-hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 md:opacity-100'}`}>メニュー</h2>
-                <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 rounded-full hidden md:block hover:bg-black/5 dark:hover:bg-white/10">
-                    <MenuAltIcon className="w-6 h-6" />
+            <div className="flex items-center justify-between p-4 border-b border-border-light dark:border-border-dark">
+                <h2 className="font-bold text-lg whitespace-nowrap overflow-hidden">メニュー</h2>
+                <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10">
+                    <XIcon className="w-6 h-6" />
                 </button>
             </div>
             <nav className="flex-grow p-2 space-y-1 overflow-y-auto custom-scrollbar">
                 {navButtons.map((button) => {
                     if ('href' in button && button.href) {
-                        return <NavButton key={button.href} href={button.href} onClick={() => {}} IconComponent={button.icon} label={button.config.label} isCollapsed={!isSidebarOpen} />;
+                        return <NavButton key={button.href} href={button.href} onClick={() => {}} IconComponent={button.icon} label={button.config.label} />;
                     }
                     if ('mode' in button) {
                         if (button.mode === 'suggest') {
-                            return <NavButton key={button.mode} onClick={() => { setIsSuggestModalOpen(true); setIsMobileMenuOpen(false); }} isActive={false} IconComponent={button.icon} label={button.config.label} isCollapsed={!isSidebarOpen} />;
+                            return <NavButton key={button.mode} onClick={() => { setIsSuggestModalOpen(true); setIsMenuOpen(false); }} isActive={false} IconComponent={button.icon} label={button.config.label} />;
                         }
-                        return <NavButton key={button.mode} onClick={() => { setMode(button.mode as Mode); setIsMobileMenuOpen(false); }} isActive={mode === button.mode} IconComponent={button.icon} label={button.config.label} isCollapsed={!isSidebarOpen} />;
+                        return <NavButton key={button.mode} onClick={() => { setMode(button.mode as Mode); setIsMenuOpen(false); }} isActive={mode === button.mode} IconComponent={button.icon} label={button.config.label} />;
                     }
                     return null;
                 })}
             </nav>
-            <div className={`p-2 border-t border-border-light dark:border-border-dark space-y-2 ${isSidebarOpen ? '' : 'hidden md:block'}`}>
-                <div className={`${isSidebarOpen ? 'flex flex-col gap-2' : 'space-y-2'}`}>
-                    {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && (
-                        <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-lg text-white font-semibold transition-colors justify-center md:justify-start" style={{backgroundColor: 'var(--primary-color)'}}>
-                            {uiConfig.twitcastingIconUrl ? <img src={uiConfig.twitcastingIconUrl} alt="TwitCasting" className="w-6 h-6 flex-shrink-0" /> : <TwitcasIcon className="w-6 h-6 flex-shrink-0"/>}
-                            <span className={`${isSidebarOpen ? 'inline' : 'hidden'}`}>{uiConfig.specialButtons.twitcas.label}</span>
-                        </a>
-                    )}
-                    {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && (
-                        <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-gray-800 hover:bg-black rounded-lg text-white font-semibold transition-colors justify-center md:justify-start">
-                             {uiConfig.xIconUrl ? <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5 flex-shrink-0" /> : <XSocialIcon className="w-5 h-5 flex-shrink-0"/>}
-                             <span className={`${isSidebarOpen ? 'inline' : 'hidden'}`}>{uiConfig.specialButtons.x.label}</span>
-                        </a>
-                    )}
-                    {uiConfig.specialButtons?.support?.enabled && (
-                        <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center gap-3 p-3 bg-pink-500 hover:bg-pink-600 rounded-lg text-white font-semibold transition-colors justify-center md:justify-start w-full">
-                            {uiConfig.supportIconUrl ? <img src={uiConfig.supportIconUrl} alt="Support" className="w-6 h-6 flex-shrink-0" /> : <HeartIcon className="w-6 h-6 flex-shrink-0" />}
-                             <span className={`${isSidebarOpen ? 'inline' : 'hidden'}`}>{uiConfig.specialButtons.support.label}</span>
-                        </button>
-                    )}
-                </div>
-            </div>
         </>
     );
 
     return (
         <>
             <div className="flex h-screen bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark">
-                {/* Mobile Sidebar Overlay */}
-                <div className={`fixed inset-0 bg-black/60 z-30 md:hidden transition-opacity ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMobileMenuOpen(false)} />
+                {/* Overlay for slide-out menu */}
+                <div className={`fixed inset-0 bg-black/60 z-30 transition-opacity ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMenuOpen(false)} />
 
-                {/* Sidebar */}
-                <aside className={`fixed md:relative z-40 h-full bg-card-background-light dark:bg-card-background-dark border-r border-border-light dark:border-border-dark flex flex-col transition-all duration-300
-                    ${isSidebarOpen ? 'w-64' : 'w-16'}
-                    md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-                `}>
+                {/* Slide-out Menu */}
+                <aside className={`fixed z-40 h-full bg-card-background-light dark:bg-card-background-dark border-r border-border-light dark:border-border-dark flex flex-col transition-transform duration-300 w-64 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                     <SidebarContent />
                 </aside>
                 
                 {/* Main Content */}
                 <div className="flex-1 flex flex-col overflow-hidden">
                     <header className="flex-shrink-0 h-16 bg-card-background-light dark:bg-card-background-dark border-b border-border-light dark:border-border-dark flex items-center justify-between px-4">
-                        <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 -ml-2">
+                        <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors -ml-2">
                             <MenuIcon className="w-6 h-6" />
+                            <span className="font-semibold">メニュー</span>
                         </button>
 
                         <div className="absolute left-1/2 -translate-x-1/2 text-center">
@@ -256,14 +231,57 @@ const App: React.FC = () => {
                         )}
                         {renderView()}
                     </main>
+                     <footer className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-t border-border-light dark:border-border-dark p-3 flex justify-center items-center gap-4">
+                        {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && (
+                            <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm" style={{backgroundColor: 'var(--primary-color)'}}>
+                                {uiConfig.twitcastingIconUrl ? <img src={uiConfig.twitcastingIconUrl} alt="TwitCasting" className="w-5 h-5" /> : <TwitcasIcon className="w-5 h-5"/>}
+                                <span>{uiConfig.specialButtons.twitcas.label}</span>
+                            </a>
+                        )}
+                        {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && (
+                             <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm" style={{backgroundColor: 'var(--primary-color)'}}>
+                                {uiConfig.xIconUrl ? <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5" /> : <XSocialIcon className="w-5 h-5" />}
+                                <span>{uiConfig.specialButtons.x.label}</span>
+                            </a>
+                        )}
+                         {uiConfig.specialButtons?.support?.enabled && (uiConfig.ofuseUrl || uiConfig.doneruUrl || uiConfig.amazonWishlistUrl) && (
+                            <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm" style={{backgroundColor: 'var(--primary-color)'}}>
+                                {uiConfig.supportIconUrl ? <img src={uiConfig.supportIconUrl} alt="Support" className="w-5 h-5" /> : <HeartIcon className="w-5 h-5"/>}
+                                <span>{uiConfig.specialButtons.support.label}</span>
+                            </button>
+                        )}
+                    </footer>
                 </div>
             </div>
 
             {isAdminAuthenticated && (
-                <AdminModal isOpen={isAdminModalOpen} onClose={() => setIsAdminModalOpen(false)} songs={songs} posts={adminPosts} uiConfig={uiConfig} setlistSuggestions={setlistSuggestions} recentRequests={recentRequests} onSaveSongs={onSaveSongs} onSavePost={onSavePost} onDeletePost={onDeletePost} onSaveUiConfig={onSaveUiConfig} />
+                <AdminModal 
+                    isOpen={isAdminModalOpen}
+                    onClose={() => setIsAdminModalOpen(false)}
+                    songs={songs}
+                    posts={adminPosts}
+                    uiConfig={uiConfig}
+                    setlistSuggestions={setlistSuggestions}
+                    recentRequests={recentRequests}
+                    onSaveSongs={onSaveSongs}
+                    onSavePost={onSavePost}
+                    onDeletePost={onDeletePost}
+                    onSaveUiConfig={onSaveUiConfig}
+                />
             )}
-            <SuggestSongModal isOpen={isSuggestModalOpen} onClose={() => setIsSuggestModalOpen(false)} songs={songs} onSelect={handleSuggestSelect} />
-            <SupportModal isOpen={isSupportModalOpen} onClose={() => setIsSupportModalOpen(false)} uiConfig={uiConfig} />
+            
+            <SuggestSongModal 
+                isOpen={isSuggestModalOpen}
+                onClose={() => setIsSuggestModalOpen(false)}
+                songs={songs}
+                onSelect={handleSuggestSelect}
+            />
+            
+            <SupportModal 
+                isOpen={isSupportModalOpen}
+                onClose={() => setIsSupportModalOpen(false)}
+                uiConfig={uiConfig}
+            />
         </>
     );
 };
