@@ -28,7 +28,7 @@ export const SetlistSuggestionView: React.FC<SetlistSuggestionViewProps> = ({ so
         if (step === 'success') {
             const timer = setTimeout(() => {
                 onSuccessRedirect();
-            }, 3000);
+            }, 4000);
             return () => clearTimeout(timer);
         }
     }, [step, onSuccessRedirect]);

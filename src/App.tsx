@@ -37,6 +37,7 @@ const App: React.FC = () => {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isInfoBannerVisible, setIsInfoBannerVisible] = useState(true);
 
     useEffect(() => {
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -44,6 +45,13 @@ const App: React.FC = () => {
         if (isDark) {
             document.documentElement.classList.add('dark');
         }
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsInfoBannerVisible(false);
+        }, 4000); // Hide after 4 seconds
+        return () => clearTimeout(timer);
     }, []);
 
     const toggleDarkMode = () => {
@@ -221,9 +229,11 @@ const App: React.FC = () => {
                             </div>
                         )}
                         
-                        <div className="mb-6 bg-blue-100 dark:bg-blue-900/50 border border-blue-500/50 text-blue-800 dark:text-blue-200 p-4 rounded-lg flex items-start gap-3 text-sm shadow-md">
-                            <InformationCircleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                            <span>URLをコピペするか、ツイキャスアプリの右上にある共有ボタンから、ブラウザでサイトを読み込むと大きな画面で閲覧できます。</span>
+                        <div className={`transition-all duration-700 ease-in-out overflow-hidden ${isInfoBannerVisible ? 'max-h-40 opacity-100 mb-6' : 'max-h-0 opacity-0'}`}>
+                            <div className="bg-blue-100 dark:bg-blue-900/50 border border-blue-500/50 text-blue-800 dark:text-blue-200 p-4 rounded-lg flex items-start gap-3 text-sm shadow-md">
+                                <InformationCircleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <span>URLをコピペするか、ツイキャスアプリの右上にある共有ボタンから、ブラウザでサイトを読み込むと大きな画面で閲覧できます。</span>
+                            </div>
                         </div>
                         
                         {uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl && (

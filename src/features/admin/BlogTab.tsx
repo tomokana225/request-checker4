@@ -87,7 +87,7 @@ export const BlogTab: React.FC<BlogTabProps> = ({ posts, onSavePost, onDeletePos
         }
 
         setIsSaving(false);
-        setTimeout(() => setSaveStatus('idle'), 3000);
+        setTimeout(() => setSaveStatus('idle'), 4000);
     };
 
     const handleDelete = async () => {

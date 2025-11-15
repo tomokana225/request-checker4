@@ -110,7 +110,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         const success = await onSaveUiConfig(config);
         setSaveStatus(success ? 'success' : 'error');
         setIsSaving(false);
-        setTimeout(() => setSaveStatus('idle'), 3000);
+        setTimeout(() => setSaveStatus('idle'), 4000);
     };
 
     const applyColorPreset = (preset: typeof colorPresets[0]) => {

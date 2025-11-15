@@ -35,7 +35,7 @@ export const RequestSongModal: React.FC<RequestSongModalProps> = ({ isOpen, onCl
             onClose();
             // Reset state for next time
             setTimeout(() => setIsSent(false), 500);
-        }, 2000);
+        }, 4000);
     };
 
     if (!isOpen) return null;

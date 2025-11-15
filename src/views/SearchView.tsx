@@ -158,7 +158,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
     
     const showLikeMessage = (msg: string) => {
         setLikeMessage(msg);
-        setTimeout(() => setLikeMessage(''), 3000);
+        setTimeout(() => setLikeMessage(''), 4000);
     };
 
     const handleLike = async (song: Song) => {
