@@ -183,7 +183,7 @@ const App: React.FC = () => {
                 
                 {/* Main Content */}
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-b border-border-light dark:border-border-dark px-2 sm:px-4 py-2">
+                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-md px-2 sm:px-4 py-3">
                         <div className="flex flex-wrap sm:flex-nowrap items-center justify-between">
                             {/* Left Section: Menu Button */}
                             <div className="flex-1 flex justify-start order-2 sm:order-1">
@@ -195,7 +195,7 @@ const App: React.FC = () => {
 
                             {/* Center Section: Title */}
                             <div className="w-full sm:w-auto flex-shrink-0 px-2 text-center order-1 sm:order-2">
-                                 <h1 className="text-lg sm:text-2xl font-bold whitespace-nowrap truncate" title={uiConfig.mainTitle}>{uiConfig.mainTitle}</h1>
+                                 <h1 className="text-2xl sm:text-3xl font-bold whitespace-nowrap truncate" title={uiConfig.mainTitle}>{uiConfig.mainTitle}</h1>
                                  <p className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark hidden sm:block">配信で演奏できる曲を調べることができます。</p>
                             </div>
 
@@ -245,20 +245,20 @@ const App: React.FC = () => {
                         {renderView()}
                     </main>
                      <footer className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-t border-border-light dark:border-border-dark p-3 flex flex-wrap justify-center items-center gap-4">
-                        {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && (
-                            <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap" style={{backgroundColor: 'var(--primary-color)'}}>
+                        {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && uiConfig.twitcastingUrl.trim() !== '' && (
+                            <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap bg-[#179BF1] hover:bg-[#1588d6]">
                                 {uiConfig.twitcastingIconUrl ? <img src={uiConfig.twitcastingIconUrl} alt="TwitCasting" className="w-5 h-5" /> : <TwitcasIcon className="w-5 h-5"/>}
                                 <span>{uiConfig.specialButtons.twitcas.label}</span>
                             </a>
                         )}
-                        {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && (
-                             <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap" style={{backgroundColor: 'var(--primary-color)'}}>
+                        {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && uiConfig.xUrl.trim() !== '' && (
+                             <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors text-sm whitespace-nowrap bg-gray-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
                                 {uiConfig.xIconUrl ? <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5" /> : <XSocialIcon className="w-5 h-5" />}
                                 <span>{uiConfig.specialButtons.x.label}</span>
                             </a>
                         )}
                          {uiConfig.specialButtons?.support?.enabled && (
-                            <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap" style={{backgroundColor: 'var(--primary-color)'}}>
+                            <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap bg-pink-500 hover:bg-pink-600">
                                 {uiConfig.supportIconUrl ? <img src={uiConfig.supportIconUrl} alt="Support" className="w-5 h-5" /> : <HeartIcon className="w-5 h-5"/>}
                                 <span>{uiConfig.specialButtons.support.label}</span>
                             </button>

@@ -127,7 +127,19 @@ export async function onRequest(context) {
             const docRef = doc(db, 'config/ui');
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
-                return jsonResponse({ ...DEFAULT_UI_CONFIG, ...docSnap.data() });
+                const firestoreConfig = docSnap.data();
+                const finalConfig = { ...DEFAULT_UI_CONFIG, ...firestoreConfig };
+
+                // Fallback logic: If URL fields are empty in Firestore, use the default.
+                // This prevents buttons from disappearing if the URL is not set in the admin panel.
+                if (!finalConfig.twitcastingUrl) {
+                    finalConfig.twitcastingUrl = DEFAULT_UI_CONFIG.twitcastingUrl;
+                }
+                if (!finalConfig.xUrl) {
+                    finalConfig.xUrl = DEFAULT_UI_CONFIG.xUrl;
+                }
+                
+                return jsonResponse(finalConfig);
             }
             return jsonResponse(DEFAULT_UI_CONFIG);
         } catch (error) {

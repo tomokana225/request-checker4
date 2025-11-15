@@ -319,7 +319,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                 </div>
 
                 {suggestions.length > 0 && (
-                    <ul className="absolute z-10 w-full mt-1 bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg overflow-hidden max-h-80 overflow-y-auto custom-scrollbar">
+                    <ul className="w-full mt-1 bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg overflow-hidden max-h-80 overflow-y-auto custom-scrollbar">
                         {suggestions.map((song, index) => (
                             <li 
                                 key={`${song.title}-${index}`}
