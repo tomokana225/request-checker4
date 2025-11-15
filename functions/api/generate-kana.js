@@ -24,8 +24,9 @@ export async function onRequest(context) {
         return new Response('Method Not Allowed', { status: 405, headers: CORS_HEADERS });
     }
 
-    if (!env.GEMINI_API_KEY) {
-        return jsonResponse({ error: 'GEMINI_API_KEY is not configured on the server.' }, 500);
+    // FIX: Updated to use env.API_KEY as per the coding guidelines for consistency.
+    if (!env.API_KEY) {
+        return jsonResponse({ error: 'API_KEY is not configured on the server.' }, 500);
     }
     
     try {
@@ -35,7 +36,8 @@ export async function onRequest(context) {
             return jsonResponse({ error: 'Invalid input: songs array is required.' }, 400);
         }
         
-        const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+        // FIX: Updated to use env.API_KEY as per the coding guidelines.
+        const ai = new GoogleGenAI({ apiKey: env.API_KEY });
 
         const prompt = `以下の日本の曲名とアーティスト名のJSONリストについて、一般的なカタカナの読み仮名を括弧付きで追記した結果を返してください。
 - 英語名、数字、記号のみ、または既にカタカナ/ひらがなの場合は、読み仮名は不要です。その場合は元の文字列をそのまま updatedTitle/updatedArtist に入れてください。
