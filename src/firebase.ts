@@ -1,11 +1,8 @@
-// FIX: Corrected Firebase initialization to use the v8 namespaced syntax.
-// The original v9 modular syntax caused errors because `initializeApp` and `getApps` were not found,
-// suggesting an older version of the Firebase SDK is in use on the client-side.
-import firebase from 'firebase/app';
+import { initializeApp, getApps } from 'firebase/app';
 
 const initializeFirebase = async () => {
   // getApps() を使用して、Firebaseがすでに初期化されているか確認します。
-  if (firebase.apps.length > 0) {
+  if (getApps().length > 0) {
     // Firebaseはすでに初期化済みです。
     return;
   }
@@ -20,8 +17,8 @@ const initializeFirebase = async () => {
       console.error("Firebase設定にAPIキーがありません。Firebaseは初期化されません。");
       return;
     }
-    // Firebase v9のモジュラー構文で初期化します。
-    firebase.initializeApp(firebaseConfig);
+    // Firebase v9+のモジュラー構文で初期化します。
+    initializeApp(firebaseConfig);
   } catch (error) {
     console.error("Firebaseの初期化エラー:", error);
     return;
