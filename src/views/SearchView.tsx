@@ -32,13 +32,13 @@ const NavCard: React.FC<{
 }> = ({ icon: Icon, title, onClick }) => (
   <button
     onClick={onClick}
-    className="group w-full flex items-center gap-2 p-3 sm:gap-4 sm:p-4 rounded-xl bg-card-background-light/80 dark:bg-card-background-dark/80 backdrop-blur-sm border border-border-light dark:border-border-dark shadow-md hover:shadow-lg hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)] dark:focus:ring-offset-card-background-dark"
+    className="group w-full flex items-center gap-2 p-3 sm:gap-4 sm:p-4 rounded-xl bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark shadow-md hover:shadow-lg hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)] dark:focus:ring-offset-card-background-dark"
     aria-label={title}
   >
     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-colors duration-300 bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/20 flex-shrink-0">
         <Icon className="w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-300" style={{ color: 'var(--primary-color)' }} />
     </div>
-    <h3 className="font-bold text-sm sm:text-base text-text-primary-light dark:text-text-primary-dark text-left">{title}</h3>
+    <h3 className="font-bold text-sm sm:text-base text-text-primary-light dark:text-text-primary-dark text-left whitespace-nowrap truncate">{title}</h3>
     <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-auto text-text-secondary-light/70 dark:text-text-secondary-dark/70 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-[var(--primary-color)] flex-shrink-0" />
   </button>
 );
@@ -319,9 +319,9 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                                 onClick={'onClick' in btn ? btn.onClick : undefined}
                                 target={'href' in btn ? '_blank' : undefined}
                                 rel={'href' in btn ? 'noopener noreferrer' : undefined}
-                                className={`flex items-center justify-center gap-3 w-full text-center px-4 py-3 sm:px-6 sm:py-4 text-white rounded-lg font-bold transition-transform transform hover:scale-105 shadow-lg ${btn.colorClasses}`}
+                                className={`flex items-center justify-center gap-3 w-full text-center px-4 py-3 sm:px-6 sm:py-4 text-white rounded-lg font-bold transition-transform transform hover:scale-105 shadow-lg ${btn.colorClasses} whitespace-nowrap`}
                             >
-                                <btn.icon className="w-6 h-6"/>
+                                <btn.icon className="w-6 h-6 flex-shrink-0"/>
                                 {btn.config.label}
                             </a>
                         ))}
