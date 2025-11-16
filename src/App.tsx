@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -16,7 +17,7 @@ import { SupportModal } from './features/support/SupportModal';
 import { 
     SearchIcon, MusicNoteIcon, ChartBarIcon, NewspaperIcon, 
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, 
-    DocumentTextIcon, CloudUploadIcon, HeartIcon, XSocialIcon, TwitcasIcon,
+    DocumentTextIcon, CloudUploadIcon,
     UserGroupIcon, ChevronLeftIcon, XIcon, InformationCircleIcon
 } from './components/ui/Icons';
 
@@ -116,7 +117,7 @@ const App: React.FC = () => {
 
         switch (mode) {
             case 'search':
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} openSupportModal={() => setIsSupportModalOpen(true)} />;
             case 'list':
                 return <ListView songs={songs} logLike={logLike} refreshRankings={refreshRankings} />;
             case 'ranking':
@@ -128,7 +129,7 @@ const App: React.FC = () => {
             case 'setlist':
                  return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
             default:
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} openSupportModal={() => setIsSupportModalOpen(true)} />;
         }
     };
 
@@ -277,33 +278,6 @@ const App: React.FC = () => {
                             </button>
                         )}
                         {renderView()}
-                        
-                        {/* Buttons formerly in footer */}
-                        <div className="mt-12 pt-8 border-t-2" style={{ borderColor: 'var(--primary-color)' }}>
-                            <div className="flex flex-col items-center gap-4">
-                                <button
-                                    onClick={() => setIsSupportModalOpen(true)}
-                                    className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md"
-                                >
-                                    <HeartIcon className="w-5 h-5" />
-                                    <span>{uiConfig.specialButtons?.support?.label || '配信者をサポート'}</span>
-                                </button>
-                                <div className="flex items-center justify-center gap-4">
-                                    {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && (
-                                        <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-sky-500 to-cyan-400 text-white shadow-md">
-                                            <TwitcasIcon className="w-5 h-5" />
-                                            <span>{uiConfig.specialButtons.twitcas.label}</span>
-                                        </a>
-                                    )}
-                                    {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && (
-                                        <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-gray-700 to-gray-900 text-white shadow-md">
-                                            <XSocialIcon className="w-5 h-5" />
-                                            <span>{uiConfig.specialButtons.x.label}</span>
-                                        </a>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
                     </main>
                 </div>
             </div>

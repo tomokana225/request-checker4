@@ -1,7 +1,9 @@
+
+
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Song, SearchResult, UiConfig, RankingItem, Mode } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
-import { SearchIcon, XIcon, PlusIcon, MusicNoteIcon, NewspaperIcon, LightBulbIcon, CloudUploadIcon, ChevronRightIcon } from '../components/ui/Icons';
+import { SearchIcon, XIcon, PlusIcon, MusicNoteIcon, NewspaperIcon, LightBulbIcon, CloudUploadIcon, ChevronRightIcon, HeartIcon, TwitcasIcon, XSocialIcon, DocumentTextIcon } from '../components/ui/Icons';
 import { SongCard } from '../components/ui/SongCard';
 import { RequestSongModal } from '../features/suggest/RequestSongModal';
 
@@ -18,6 +20,7 @@ interface SearchViewProps {
     songRankingList: RankingItem[];
     setMode: (mode: Mode) => void;
     openSuggestModal: () => void;
+    openSupportModal: () => void;
 }
 
 const MAX_RELATED_SONGS = 5;
@@ -32,7 +35,7 @@ const NavCard: React.FC<{
     className="group w-full flex items-center gap-2 p-3 sm:gap-4 sm:p-4 rounded-xl bg-card-background-light/80 dark:bg-card-background-dark/80 backdrop-blur-sm border border-border-light dark:border-border-dark shadow-md hover:shadow-lg hover:border-[var(--primary-color)] transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary-color)] dark:focus:ring-offset-card-background-dark"
     aria-label={title}
   >
-    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-colors duration-300 bg-[var(--primary-color)]/10 group-hover:bg-[var(--primary-color)]/20 flex-shrink-0">
+    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-colors duration-300 bg-black/5 dark:bg-white/10 group-hover:bg-black/10 dark:group-hover:bg-white/20 flex-shrink-0">
         <Icon className="w-5 h-5 sm:w-6 sm:h-6 transition-colors duration-300" style={{ color: 'var(--primary-color)' }} />
     </div>
     <h3 className="font-bold text-sm sm:text-base text-text-primary-light dark:text-text-primary-dark text-left">{title}</h3>
@@ -41,14 +44,15 @@ const NavCard: React.FC<{
 );
 
 
-export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, onAdminLogin, uiConfig, songRankingList, setMode, openSuggestModal }) => {
+export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLike, logRequest, refreshRankings, searchTerm, setSearchTerm, onAdminLogin, uiConfig, songRankingList, setMode, openSuggestModal, openSupportModal }) => {
     const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
     const [suggestions, setSuggestions] = useState<Song[]>([]);
     const [isLiking, setIsLiking] = useState<string | null>(null);
     const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
     const [likeMessage, setLikeMessage] = useState('');
-    const searchContainerRef = useRef<HTMLDivElement>(null);
+    // FIX: Changed ref type from HTMLDivElement to HTMLFormElement to match the element it's attached to.
+    const searchContainerRef = useRef<HTMLFormElement>(null);
     const initialSearchTermRef = useRef(searchTerm);
 
     const popularSongs = useMemo(() => {
@@ -64,103 +68,131 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
             normalizedTitle: normalizeForSearch(song.title),
             normalizedArtist: normalizeForSearch(song.artist),
             normalizedTitleKana: normalizeForSearch(song.titleKana || ''),
-            normalizedArtistKana: normalizeForSearch(song.artistKana || '')
+            normalizedArtistKana: normalizeForSearch(song.artistKana || ''),
         }));
     }, [songs]);
 
-    // Update suggestions based on search term
-    useEffect(() => {
-        // Don't show suggestions if a search has been executed and the term hasn't changed
-        if (searchResult && normalizeForSearch(searchTerm) === normalizeForSearch(searchResult.searchTerm)) {
-            setSuggestions([]);
-            return;
-        }
-
-        if (searchTerm.trim().length > 1) {
-            const normalizedTerm = normalizeForSearch(searchTerm);
-            const filteredSuggestions = normalizedSongs
-                .filter(s => 
-                    s.normalizedTitle.includes(normalizedTerm) || 
-                    s.normalizedArtist.includes(normalizedTerm) ||
-                    s.normalizedTitleKana.includes(normalizedTerm) ||
-                    s.normalizedArtistKana.includes(normalizedTerm)
-                )
-                .map(s => s.original)
-                .slice(0, 10); // Limit to 10 suggestions
-            setSuggestions(filteredSuggestions);
-        } else {
-            setSuggestions([]);
-        }
-    }, [searchTerm, normalizedSongs, searchResult]);
-
     const performSearch = useCallback((term: string) => {
-        if (term.trim().toLowerCase() === 'admin') {
-            onAdminLogin();
-            setSearchTerm(''); 
-            setSuggestions([]);
-            setSearchResult(null);
-            return;
-        }
-        
         if (!term.trim()) {
             setSearchResult(null);
+            setSuggestions([]);
             return;
         }
 
-        setSuggestions([]); // Hide suggestions after search
         const normalizedTerm = normalizeForSearch(term);
-        logSearch(normalizedTerm);
-        
-        let exactMatches: Song[] = [];
-        let titleMatches: Song[] = [];
-        let artistMatches: Song[] = [];
-        
-        for (const s of normalizedSongs) {
-            const isMatch = s.normalizedTitle.includes(normalizedTerm) || 
-                            s.normalizedArtist.includes(normalizedTerm) ||
-                            s.normalizedTitleKana.includes(normalizedTerm) ||
-                            s.normalizedArtistKana.includes(normalizedTerm);
+        let foundSongs: Song[] = [];
+        let relatedSongs: Song[] = [];
 
-            if (isMatch) {
-                const isExactMatch = s.normalizedTitle === normalizedTerm || 
-                                     s.normalizedArtist === normalizedTerm ||
-                                     s.normalizedTitleKana === normalizedTerm ||
-                                     s.normalizedArtistKana === normalizedTerm;
+        for (const { original, normalizedTitle, normalizedArtist, normalizedTitleKana, normalizedArtistKana } of normalizedSongs) {
+            const titleMatch = normalizedTitle === normalizedTerm || normalizedTitleKana === normalizedTerm;
+            const artistMatch = normalizedArtist === normalizedTerm || normalizedArtistKana === normalizedTerm;
 
-                if (isExactMatch) {
-                    exactMatches.push(s.original);
-                } else if (s.normalizedTitle.includes(normalizedTerm) || s.normalizedTitleKana.includes(normalizedTerm)) {
-                    titleMatches.push(s.original);
-                } else {
-                    artistMatches.push(s.original);
-                }
+            if (titleMatch || artistMatch) {
+                foundSongs.push(original);
+            } else if (
+                (normalizedTitle.includes(normalizedTerm) || normalizedTitleKana.includes(normalizedTerm) ||
+                 normalizedArtist.includes(normalizedTerm) || normalizedArtistKana.includes(normalizedTerm))
+            ) {
+                relatedSongs.push(original);
             }
         }
-        
-        const foundSongs = [...new Set([...exactMatches, ...titleMatches, ...artistMatches])];
 
         if (foundSongs.length > 0) {
             setSearchResult({ status: 'found', songs: foundSongs, searchTerm: term });
+            logSearch(term);
+        } else if (relatedSongs.length > 0) {
+            setSearchResult({ status: 'related', songs: relatedSongs.slice(0, MAX_RELATED_SONGS), searchTerm: term });
         } else {
-            const relatedSongs: Song[] = [];
-            setSearchResult({ 
-                status: relatedSongs.length > 0 ? 'related' : 'notFound', 
-                songs: relatedSongs.slice(0, MAX_RELATED_SONGS), 
-                searchTerm: term 
-            });
+            setSearchResult({ status: 'notFound', songs: [], searchTerm: term });
         }
+        setSuggestions([]);
 
-    }, [logSearch, normalizedSongs, onAdminLogin, setSearchTerm]);
+    }, [normalizedSongs, logSearch]);
     
+    // Auto-search if search term is passed in from another view
     useEffect(() => {
-        // If the view is loaded with a pre-existing search term (e.g., from the suggest modal),
-        // perform the search immediately on mount. This only runs once.
-        if (initialSearchTermRef.current.trim()) {
+        if (initialSearchTermRef.current) {
             performSearch(initialSearchTermRef.current);
+            initialSearchTermRef.current = ''; // Prevent re-searching on subsequent renders
         }
     }, [performSearch]);
 
-    // Close suggestions when clicking outside
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const term = e.target.value;
+        setSearchTerm(term);
+        if (!term.trim()) {
+            setSearchResult(null);
+            setSuggestions([]);
+            return;
+        }
+        
+        const normalizedTerm = normalizeForSearch(term);
+        const filteredSuggestions = normalizedSongs
+            .filter(({ normalizedTitle, normalizedArtist, normalizedTitleKana, normalizedArtistKana }) =>
+                normalizedTitle.startsWith(normalizedTerm) ||
+                normalizedArtist.startsWith(normalizedTerm) ||
+                normalizedTitleKana.startsWith(normalizedTerm) ||
+                normalizedArtistKana.startsWith(normalizedTerm)
+            )
+            .map(s => s.original)
+            .slice(0, 5);
+        setSuggestions(filteredSuggestions);
+    };
+
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const term = searchTerm.trim().toLowerCase();
+
+        if (term === 'admin') {
+            const password = prompt("管理者パスワードを入力してください:");
+            if (password === 'tomokanachan') {
+                onAdminLogin();
+            } else if (password) {
+                alert("パスワードが違います。");
+            }
+            setSearchTerm('');
+            setSearchResult(null);
+            setSuggestions([]);
+            return;
+        }
+
+        performSearch(searchTerm);
+    };
+    
+    const handleSuggestionClick = (song: Song) => {
+        setSearchTerm(song.title);
+        performSearch(song.title);
+    };
+    
+    const showLikeMessage = (msg: string) => {
+        setLikeMessage(msg);
+        setTimeout(() => setLikeMessage(''), 3000);
+    };
+
+    const handleLike = async (song: Song) => {
+        if (likedSongs.has(song.title)) return;
+
+        setIsLiking(song.title);
+        await logLike(song.title, song.artist);
+        setLikedSongs(prev => new Set(prev).add(song.title));
+        await refreshRankings(); // Update like ranking data
+        setIsLiking(null);
+        showLikeMessage(`「${song.title}」にいいねしました！`);
+    };
+
+    const onAdminTrigger = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.ctrlKey && e.key === 'a') {
+            e.preventDefault();
+            const password = prompt("管理者パスワードを入力してください:");
+            if (password === 'tomokanachan') { // Super secure password
+                onAdminLogin();
+            } else if (password) {
+                alert("パスワードが違います。");
+            }
+        }
+    }, [onAdminLogin]);
+    
+    // Close suggestions if clicked outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -170,176 +202,150 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-    
-    const showLikeMessage = (msg: string) => {
-        setLikeMessage(msg);
-        setTimeout(() => setLikeMessage(''), 4000);
-    };
 
-    const handleLike = async (song: Song) => {
-        if (likedSongs.has(song.title)) return;
-        setIsLiking(song.title);
-        await logLike(song.title, song.artist);
-        setLikedSongs(prev => new Set(prev).add(song.title));
-        await refreshRankings();
-        setIsLiking(null);
-        showLikeMessage(`「${song.title}」にいいねしました！`);
-    };
-
-    const handleRequestSuccess = () => {
-        setSearchResult(null);
-        setSearchTerm('');
-        refreshRankings();
-    };
-
-    const renderResult = () => {
-        if (!searchResult) return null;
-
-        const { status, songs: resultSongs, searchTerm: term } = searchResult;
-        
-        return (
-            <div className="mt-8 animate-fade-in">
-                <h2 className="text-xl font-semibold mb-4 text-center">
-                    {status === 'found' ? `「${term}」の検索結果` : `「${term}」は見つかりませんでした`}
-                </h2>
-                {status === 'found' && (
-                    <div className="space-y-3">
-                        {resultSongs.map((song, index) => 
-                            <SongCard 
-                                key={`${song.title}-${index}`} 
-                                song={song} 
-                                onLike={handleLike} 
-                                isLiking={isLiking === song.title}
-                                isLiked={likedSongs.has(song.title)}
-                            />
-                        )}
-                    </div>
-                )}
-                
-                {(status === 'notFound' || status === 'related') && (
-                    <div className="text-center p-6 bg-input-bg-light dark:bg-card-background-dark/50 rounded-lg">
-                        <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                            この曲はまだレパートリーにありません。
-                        </p>
-                        <button 
-                            onClick={() => setIsRequestModalOpen(true)}
-                            className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-transform transform hover:scale-105"
-                        >
-                            <PlusIcon className="w-5 h-5" />
-                            この曲をリクエストする
-                        </button>
-                    </div>
-                )}
-                 <RequestSongModal 
-                    isOpen={isRequestModalOpen}
-                    onClose={() => setIsRequestModalOpen(false)}
-                    songTitle={term}
-                    logRequest={logRequest}
-                    onSuccess={handleRequestSuccess}
-                    uiConfig={uiConfig}
-                />
-            </div>
-        );
-    };
+    const specialButtons = useMemo(() => {
+        if (!uiConfig.specialButtons) return [];
+        const buttonConfigs = {
+            twitcas: {
+                href: uiConfig.twitcastingUrl,
+                icon: uiConfig.twitcastingIconUrl ? () => <img src={uiConfig.twitcastingIconUrl} alt="Twitcas" className="w-6 h-6"/> : TwitcasIcon,
+                config: uiConfig.specialButtons.twitcas,
+                colorClasses: 'bg-[#2190b8] hover:bg-[#1c7a9e]',
+            },
+            x: {
+                href: uiConfig.xUrl,
+                icon: uiConfig.xIconUrl ? () => <img src={uiConfig.xIconUrl} alt="X" className="w-6 h-6"/> : XSocialIcon,
+                config: uiConfig.specialButtons.x,
+                colorClasses: 'bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 dark:text-black',
+            },
+            support: {
+                onClick: openSupportModal,
+                icon: uiConfig.supportIconUrl ? () => <img src={uiConfig.supportIconUrl} alt="Support" className="w-6 h-6"/> : HeartIcon,
+                config: uiConfig.specialButtons.support,
+                colorClasses: 'bg-pink-500 hover:bg-pink-600',
+            }
+        };
+        const buttonOrder: (keyof typeof buttonConfigs)[] = ['twitcas', 'x', 'support'];
+        return buttonOrder.map(key => buttonConfigs[key]).filter(btn => btn && btn.config?.enabled);
+    }, [uiConfig, openSupportModal]);
 
     return (
-        <div className="w-full max-w-2xl mx-auto">
-            <div className="relative" ref={searchContainerRef}>
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <SearchIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
-                </div>
-                <input
-                    type="search"
-                    placeholder={uiConfig.subtitle}
-                    className="w-full pl-12 pr-10 py-4 text-base sm:text-lg border-2 border-border-light dark:border-border-dark bg-input-bg-light dark:bg-input-bg-dark rounded-full focus:outline-none focus:ring-2"
-                    style={{'--tw-ring-color': 'var(--primary-color)'} as React.CSSProperties}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && performSearch(searchTerm)}
-                    aria-label="曲を検索"
-                />
-                {searchTerm && (
-                    <button onClick={() => { setSearchTerm(''); setSearchResult(null); }} className="absolute inset-y-0 right-0 pr-4 flex items-center">
-                        <XIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
-                    </button>
-                )}
-                
-                {suggestions.length > 0 && (
-                    <div className="absolute z-10 w-full mt-2 bg-card-background-light dark:bg-card-background-dark rounded-lg shadow-lg border border-border-light dark:border-border-dark max-h-60 overflow-y-auto custom-scrollbar">
-                        <ul>
-                            {suggestions.map((song, index) => (
-                                <li key={index}>
-                                    <button 
-                                        onClick={() => { setSearchTerm(song.title); performSearch(song.title); }}
-                                        className="w-full text-left px-4 py-3 hover:bg-black/5 dark:hover:bg-white/10"
-                                    >
-                                        <span className="font-semibold">{song.title}</span>
-                                        <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark ml-2">- {song.artist}</span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
+        <div className="w-full max-w-2xl mx-auto animate-fade-in">
+            <div className="text-center mb-8">
+                <p className="text-base sm:text-lg text-text-secondary-light dark:text-text-secondary-dark">{uiConfig.subtitle}</p>
             </div>
-             {likeMessage && (
-                <div className="text-center text-green-500 dark:text-green-400 h-6 mt-2 flex items-center justify-center">
-                    {likeMessage}
+            <form onSubmit={handleSearchSubmit} className="mb-6 relative" ref={searchContainerRef}>
+                <div className="relative">
+                    <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-text-secondary-light dark:text-text-secondary-dark pointer-events-none" />
+                    <input
+                        type="search"
+                        placeholder="曲名やアーティスト名で検索"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        onKeyDown={onAdminTrigger}
+                        className="w-full bg-input-bg-light dark:bg-input-bg-dark border-2 border-border-light dark:border-border-dark rounded-full py-3 sm:py-4 pl-12 pr-12 text-base sm:text-lg focus:outline-none focus:ring-2"
+                        style={{'--tw-ring-color': 'var(--primary-color)'} as React.CSSProperties}
+                        aria-label="検索"
+                    />
+                    {searchTerm && (
+                        <button type="button" onClick={() => { setSearchTerm(''); setSearchResult(null); setSuggestions([]); }} className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark">
+                            <XIcon className="w-6 h-6" />
+                        </button>
+                    )}
                 </div>
-             )}
+                {suggestions.length > 0 && (
+                    <ul className="absolute z-10 w-full mt-2 bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg">
+                        {suggestions.map((song, index) => (
+                            <li key={index} onClick={() => handleSuggestionClick(song)} className="px-4 py-2 cursor-pointer hover:bg-black/5 dark:hover:bg-white/10">
+                                {song.title} <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">- {song.artist}</span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </form>
 
-            {searchResult ? renderResult() : (
+             {likeMessage && <p className="text-center text-pink-500 h-6 mb-4 flex items-center justify-center">{likeMessage}</p>}
+
+            {searchResult ? (
+                <div className="space-y-4">
+                    {searchResult.status === 'found' && (
+                         <>
+                            <h2 className="text-xl font-bold text-center">演奏できます！</h2>
+                            {searchResult.songs.map((song, index) => <SongCard key={index} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}
+                        </>
+                    )}
+                    {searchResult.status === 'related' && (
+                        <>
+                            <h2 className="text-xl font-bold text-center">もしかして？</h2>
+                            {searchResult.songs.map((song, index) => <SongCard key={index} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}
+                        </>
+                    )}
+                    {searchResult.status === 'notFound' && (
+                        <div className="text-center p-6 bg-input-bg-light dark:bg-card-background-dark/50 rounded-lg">
+                            <h2 className="text-xl font-bold mb-2">見つかりませんでした</h2>
+                            <p className="text-text-secondary-light dark:text-text-secondary-dark mb-4">リクエストしてみるか、ぷりんと楽譜で探してみてください。</p>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button onClick={() => setIsRequestModalOpen(true)} className="colorful-button flex items-center justify-center gap-2 px-6 py-3 text-white rounded-lg transition-transform transform hover:scale-105 shadow" style={{backgroundColor: 'var(--primary-color)'}}>
+                                    <PlusIcon className="w-5 h-5" />
+                                    リクエストする
+                                </button>
+                                {(() => {
+                                    const printGakufuSearchUrl = `${uiConfig.printGakufuUrl || 'https://www.print-gakufu.com/'}search/result/score___keyword__${encodeURIComponent(searchResult.searchTerm)}/`;
+                                    return (
+                                        <a href={printGakufuSearchUrl} target="_blank" rel="noopener noreferrer" className="colorful-button flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-transform transform hover:scale-105 shadow">
+                                            <DocumentTextIcon className="w-5 h-5" />
+                                            ぷりんと楽譜で探す
+                                        </a>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            ) : (
                 <>
-                    <div className="grid grid-cols-2 gap-4 mt-12 animate-fade-in">
-                        <NavCard 
-                            icon={MusicNoteIcon}
-                            title="曲リスト"
-                            onClick={() => setMode('list')}
-                        />
-                        <NavCard 
-                            icon={NewspaperIcon}
-                            title="お知らせ"
-                            onClick={() => setMode('news')}
-                        />
-                        <NavCard 
-                            icon={LightBulbIcon}
-                            title="おまかせ選曲"
-                            onClick={openSuggestModal}
-                        />
-                        <NavCard 
-                            icon={CloudUploadIcon}
-                            title="リクエスト"
-                            onClick={() => setMode('requests')}
-                        />
+                    <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4">
+                        {uiConfig.navButtons?.list?.enabled && <NavCard icon={MusicNoteIcon} title={uiConfig.navButtons.list.label} onClick={() => setMode('list')} />}
+                        {uiConfig.navButtons?.news?.enabled && <NavCard icon={NewspaperIcon} title={uiConfig.navButtons.news.label} onClick={() => setMode('news')} />}
+                        {uiConfig.navButtons?.suggest?.enabled && <NavCard icon={LightBulbIcon} title={uiConfig.navButtons.suggest.label} onClick={openSuggestModal} />}
+                        {uiConfig.navButtons?.requests?.enabled && <NavCard icon={CloudUploadIcon} title={uiConfig.navButtons.requests.label} onClick={() => setMode('requests')} />}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                        {specialButtons.map((btn, index) => (
+                            <a
+                                key={index}
+                                href={'href' in btn ? btn.href : undefined}
+                                onClick={'onClick' in btn ? btn.onClick : undefined}
+                                target={'href' in btn ? '_blank' : undefined}
+                                rel={'href' in btn ? 'noopener noreferrer' : undefined}
+                                className={`flex items-center justify-center gap-3 w-full text-center px-4 py-3 sm:px-6 sm:py-4 text-white rounded-lg font-bold transition-transform transform hover:scale-105 shadow-lg ${btn.colorClasses}`}
+                            >
+                                <btn.icon className="w-6 h-6"/>
+                                {btn.config.label}
+                            </a>
+                        ))}
                     </div>
                     
                     {popularSongs.length > 0 && (
-                        <div className="mt-12 animate-fade-in">
-                            <h2 className="text-xl font-semibold mb-4 text-center">人気の曲</h2>
+                         <div>
+                            <h2 className="text-xl font-bold text-center mb-4">人気の曲</h2>
                             <div className="space-y-3">
-                                {popularSongs.map((song) => (
-                                    <SongCard 
-                                        key={song.title} 
-                                        song={song} 
-                                        onLike={handleLike} 
-                                        isLiking={isLiking === song.title}
-                                        isLiked={likedSongs.has(song.title)}
-                                    />
-                                ))}
-                            </div>
-                             <div className="text-center mt-6">
-                                <button
-                                    onClick={() => setMode('ranking')}
-                                    className="font-semibold transition-opacity hover:opacity-75"
-                                    style={{ color: 'var(--primary-color)' }}
-                                >
-                                    すべてのランキングを見る →
-                                </button>
+                                {popularSongs.map((song, index) => <SongCard key={index} song={song} onLike={handleLike} isLiking={isLiking === song.title} isLiked={likedSongs.has(song.title)} />)}
                             </div>
                         </div>
                     )}
                 </>
             )}
+
+            <RequestSongModal
+                isOpen={isRequestModalOpen}
+                onClose={() => setIsRequestModalOpen(false)}
+                songTitle={searchResult?.searchTerm || ''}
+                logRequest={logRequest}
+                onSuccess={refreshRankings}
+                uiConfig={uiConfig}
+            />
         </div>
     );
 };
