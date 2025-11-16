@@ -1,5 +1,9 @@
 
 
+
+
+
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -118,7 +122,7 @@ const App: React.FC = () => {
 
         switch (mode) {
             case 'search':
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} />;
             case 'list':
                 return <ListView songs={songs} logLike={logLike} refreshRankings={refreshRankings} />;
             case 'ranking':
@@ -130,7 +134,7 @@ const App: React.FC = () => {
             case 'setlist':
                  return <SetlistSuggestionView songs={songs} onSave={saveSetlistSuggestion} onSuccessRedirect={handleSetlistSuccess}/>;
             default:
-                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} />;
+                return <SearchView songs={songs} logSearch={logSearch} logLike={logLike} logRequest={logRequest} refreshRankings={refreshRankings} searchTerm={searchTerm} setSearchTerm={setSearchTerm} onAdminLogin={handleAdminLogin} uiConfig={uiConfig} songRankingList={songRankingList} setMode={setMode} openSuggestModal={() => setIsSuggestModalOpen(true)} />;
         }
     };
 
@@ -226,7 +230,7 @@ const App: React.FC = () => {
 
                             {/* Center Section: Title */}
                             <div className="w-full sm:w-auto flex-shrink-0 px-2 text-center order-1 sm:order-2">
-                                 <h1 className="text-2xl sm:text-3xl font-bold whitespace-nowrap truncate" title={uiConfig.mainTitle}>{uiConfig.mainTitle}</h1>
+                                 <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-normal sm:whitespace-nowrap" title={uiConfig.mainTitle}>{uiConfig.mainTitle}</h1>
                                  <p className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark hidden sm:block">配信で演奏できる曲を調べることができます。</p>
                             </div>
 
