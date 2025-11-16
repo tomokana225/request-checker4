@@ -1,9 +1,4 @@
 
-
-
-
-
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -22,8 +17,7 @@ import {
     SearchIcon, MusicNoteIcon, ChartBarIcon, NewspaperIcon, 
     LightBulbIcon, MenuIcon, SunIcon, MoonIcon, 
     DocumentTextIcon, CloudUploadIcon, HeartIcon, XSocialIcon, TwitcasIcon,
-    UserGroupIcon, ChevronLeftIcon, XIcon, InformationCircleIcon,
-    ChevronDownIcon, ChevronUpIcon
+    UserGroupIcon, ChevronLeftIcon, XIcon, InformationCircleIcon
 } from './components/ui/Icons';
 
 
