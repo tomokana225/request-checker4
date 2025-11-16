@@ -128,7 +128,19 @@ export async function onRequest(context) {
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 const firestoreConfig = docSnap.data();
-                const finalConfig = { ...DEFAULT_UI_CONFIG, ...firestoreConfig };
+                // Deep merge for nested button configurations
+                const finalConfig = {
+                    ...DEFAULT_UI_CONFIG,
+                    ...firestoreConfig,
+                    specialButtons: {
+                        ...DEFAULT_UI_CONFIG.specialButtons,
+                        ...(firestoreConfig.specialButtons || {}),
+                    },
+                    navButtons: {
+                        ...DEFAULT_UI_CONFIG.navButtons,
+                        ...(firestoreConfig.navButtons || {}),
+                    }
+                };
 
                 // Fallback logic: If URL fields are empty in Firestore, use the default.
                 // This prevents buttons from disappearing if the URL is not set in the admin panel.
