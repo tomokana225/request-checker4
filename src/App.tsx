@@ -1,6 +1,6 @@
 
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
@@ -57,7 +57,7 @@ const App: React.FC = () => {
         }, 4000); // Hide after 4 seconds
         return () => clearTimeout(timer);
     }, []);
-
+    
     const toggleDarkMode = () => {
         setIsDarkMode(prev => {
             const newIsDark = !prev;
@@ -125,7 +125,7 @@ const App: React.FC = () => {
             case 'ranking':
                 return <RankingView songs={songs} songRanking={songRankingList} artistRanking={artistRankingList} songLikeRanking={songLikeRankingList} period={rankingPeriod} setPeriod={setRankingPeriod} />;
             case 'requests':
-                return <RequestRankingView recentRequests={recentRequests} logRequest={logRequest} refreshRankings={refreshRankings} />;
+                return <RequestRankingView recentRequests={recentRequests} logRequest={logRequest} refreshRankings={refreshRankings} uiConfig={uiConfig} />;
             case 'news':
                 return <BlogView posts={posts} />;
             case 'setlist':
@@ -145,11 +145,15 @@ const App: React.FC = () => {
             ranking: { mode: 'ranking', icon: ChartBarIcon, config: uiConfig.navButtons.ranking },
             requests: { mode: 'requests', icon: CloudUploadIcon, config: uiConfig.navButtons.requests },
             setlist: { mode: 'setlist', icon: MenuIcon, config: uiConfig.navButtons.setlist },
-            printGakufu: { href: 'https://www.print-gakufu.com/search/result/score___subscription/', icon: DocumentTextIcon, config: uiConfig.navButtons.printGakufu },
+            printGakufu: { 
+                href: uiConfig.printGakufuUrl || '#', 
+                icon: DocumentTextIcon, 
+                config: uiConfig.navButtons.printGakufu 
+            },
         };
         const buttonOrder: (keyof typeof buttonConfigs)[] = ['search', 'list', 'suggest', 'news', 'ranking', 'requests', 'setlist', 'printGakufu'];
         return buttonOrder.map(key => buttonConfigs[key]).filter(btn => btn && btn.config?.enabled);
-    }, [uiConfig.navButtons]);
+    }, [uiConfig.navButtons, uiConfig.printGakufuUrl]);
 
     const backgroundStyle: React.CSSProperties =
         uiConfig.backgroundType === 'image' && uiConfig.backgroundImageUrl
@@ -184,7 +188,7 @@ const App: React.FC = () => {
             <nav className="flex-grow p-2 space-y-1 overflow-y-auto custom-scrollbar">
                 {navButtons.map((button) => {
                     if ('href' in button && button.href) {
-                        return <NavButton key={button.href} href={button.href} onClick={() => {}} IconComponent={button.icon} label={button.config.label} />;
+                        return <NavButton key={button.href as string} onClick={() => setIsMenuOpen(false)} href={button.href as string} IconComponent={button.icon} label={button.config.label} />;
                     }
                     if ('mode' in button) {
                         if (button.mode === 'suggest') {
@@ -210,14 +214,14 @@ const App: React.FC = () => {
                 </aside>
                 
                 {/* Main Content */}
-                <div className="flex-1 flex flex-col">
-                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg px-4 sm:px-6 py-4 border-b-2" style={{ borderColor: 'var(--primary-color)' }}>
+                <div className="flex-1 flex flex-col overflow-x-hidden">
+                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg px-4 sm:px-6 py-2 sm:py-4 border-b-2" style={{ borderColor: 'var(--primary-color)' }}>
                         <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-3">
                             {/* Left Section: Menu Button */}
                             <div className="flex-1 flex justify-start order-2 sm:order-1">
                                 <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                                     <MenuIcon className="w-6 h-6" />
-                                    <span className="font-semibold">メニュー</span>
+                                    <span className="font-semibold hidden sm:inline">メニュー</span>
                                 </button>
                             </div>
 
@@ -228,14 +232,17 @@ const App: React.FC = () => {
                             </div>
 
                             {/* Right Section: Icons */}
-                            <div className="flex-1 flex justify-end items-center gap-1 sm:gap-2 order-3 sm:order-3">
-                               <div className="flex items-center gap-1 sm:gap-2 bg-black/5 dark:bg-white/5 px-2 py-1.5 rounded-full" title="現在の訪問者数">
-                                    <UserGroupIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
-                                    <span className="text-sm font-semibold hidden sm:inline">{activeUserCount}</span>
+                            <div className="flex-1 flex justify-end items-center gap-2 relative order-3 sm:order-3">
+                                {/* Visitor count & dark mode toggle - desktop only */}
+                                <div className="hidden sm:flex items-center gap-2">
+                                    <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-3 py-1.5 rounded-full" title="現在の訪問者数">
+                                        <UserGroupIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
+                                        <span className="text-sm font-semibold">{activeUserCount}</span>
+                                    </div>
+                                    <button onClick={toggleDarkMode} className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
+                                        {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
+                                    </button>
                                 </div>
-                                <button onClick={toggleDarkMode} className="p-2 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10" aria-label="Toggle dark mode">
-                                    {isDarkMode ? <SunIcon className="w-6 h-6" /> : <MoonIcon className="w-6 h-6" />}
-                                </button>
                             </div>
                         </div>
                     </header>
@@ -274,39 +281,39 @@ const App: React.FC = () => {
                         )}
                         {renderView()}
                     </main>
-                     <footer className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-t border-border-light dark:border-border-dark relative">
+                    <footer className="relative flex-shrink-0 bg-card-background-light/80 dark:bg-card-background-dark/80 backdrop-blur-sm border-t-2 transition-all duration-500 ease-in-out" style={{ borderColor: 'var(--primary-color)' }}>
                         <button
                             onClick={() => setIsFooterCollapsed(prev => !prev)}
-                            className={`absolute ${isFooterCollapsed ? '-top-5 right-3' : 'top-2 right-2'} bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-full p-1.5 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/10 transition-all duration-300 ease-in-out shadow-lg z-10`}
+                            className={`absolute right-2 w-8 h-8 bg-card-background-light dark:bg-card-background-dark rounded-full border-2 flex items-center justify-center transition-all duration-300 hover:scale-110 z-10 ${isFooterCollapsed ? '-top-4' : 'top-2'}`}
+                            style={{ borderColor: 'var(--primary-color)' }}
                             aria-label={isFooterCollapsed ? 'フッターを開く' : 'フッターを閉じる'}
                         >
                             {isFooterCollapsed ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
                         </button>
-                        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isFooterCollapsed ? 'max-h-0' : 'max-h-48'}`}>
-                            <div className="p-4 pt-6 pb-4 flex flex-col sm:flex-row sm:justify-center items-center gap-y-3 sm:gap-x-4">
-                                {/* Top Row: Support Button */}
-                                {uiConfig.specialButtons?.support?.enabled && (
-                                    <div className="flex justify-center">
-                                        <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-white font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
-                                            {uiConfig.supportIconUrl ? <img src={uiConfig.supportIconUrl} alt="Support" className="w-5 h-5" /> : <HeartIcon className="w-5 h-5"/>}
-                                            <span>{uiConfig.specialButtons.support.label}</span>
-                                        </button>
+                        <div className={`transition-all duration-500 ease-in-out overflow-hidden ${isFooterCollapsed ? 'max-h-0' : 'max-h-56'}`}>
+                            <div className="p-4">
+                                <div className="flex flex-col items-center gap-3">
+                                    <button
+                                        onClick={() => setIsSupportModalOpen(true)}
+                                        className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-md"
+                                    >
+                                        <HeartIcon className="w-5 h-5" />
+                                        <span>{uiConfig.specialButtons?.support?.label || '配信者をサポート'}</span>
+                                    </button>
+                                    <div className="flex items-center justify-center gap-3">
+                                        {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && (
+                                            <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-sky-500 to-cyan-400 text-white shadow-md">
+                                                <TwitcasIcon className="w-5 h-5" />
+                                                <span>{uiConfig.specialButtons.twitcas.label}</span>
+                                            </a>
+                                        )}
+                                        {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && (
+                                            <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg colorful-button bg-gradient-to-r from-gray-700 to-gray-900 text-white shadow-md">
+                                                <XSocialIcon className="w-5 h-5" />
+                                                <span>{uiConfig.specialButtons.x.label}</span>
+                                            </a>
+                                        )}
                                     </div>
-                                )}
-                                {/* Bottom Row: Other Buttons */}
-                                <div className="flex justify-center items-center gap-4">
-                                    {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && uiConfig.twitcastingUrl.trim() !== '' && (
-                                        <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-white font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-[#179BF1] to-[#4ab3f3] hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
-                                            {uiConfig.twitcastingIconUrl ? <img src={uiConfig.twitcastingIconUrl} alt="TwitCasting" className="w-5 h-5" /> : <TwitcasIcon className="w-5 h-5"/>}
-                                            <span>{uiConfig.specialButtons.twitcas.label}</span>
-                                        </a>
-                                    )}
-                                    {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && uiConfig.xUrl.trim() !== '' && (
-                                         <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-gray-800 to-black dark:from-gray-200 dark:to-white text-white dark:text-black hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
-                                            {uiConfig.xIconUrl ? <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5" /> : <XSocialIcon className="w-5 h-5" />}
-                                            <span>{uiConfig.specialButtons.x.label}</span>
-                                        </a>
-                                    )}
                                 </div>
                             </div>
                         </div>

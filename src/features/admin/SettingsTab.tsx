@@ -122,7 +122,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
         }));
     };
     
-    const navButtonKeys: (keyof UiConfig['navButtons'])[] = ['search', 'printGakufu', 'list', 'ranking', 'news', 'requests', 'suggest', 'setlist'];
+    const navButtonKeys: (keyof UiConfig['navButtons'])[] = ['search', 'list', 'ranking', 'news', 'requests', 'suggest', 'setlist', 'printGakufu'];
 
     return (
         <div>
@@ -171,6 +171,10 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ uiConfig, onSaveUiConf
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">X (Twitter) アイコンURL</label>
                     <input type="text" name="xIconUrl" value={config.xIconUrl || ''} onChange={handleInputChange} placeholder="https://example.com/icon.png" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">カスタムアイコンのURLを入力します。空の場合、デフォルトのXアイコンが表示されます。</p>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ぷりんと楽譜 URL</label>
+                    <input type="text" name="printGakufuUrl" value={config.printGakufuUrl || ''} onChange={handleInputChange} placeholder="https://www.print-gakufu.com/" className="mt-1 block w-full bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)] sm:text-sm p-2" />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">テーマカラー</label>

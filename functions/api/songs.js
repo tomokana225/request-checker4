@@ -15,6 +15,7 @@ const DEFAULT_UI_CONFIG = {
     primaryColor: '#ec4899',
     twitcastingUrl: 'https://twitcasting.tv/g:101738740616323847745',
     xUrl: 'https://x.com/',
+    printGakufuUrl: 'https://www.print-gakufu.com/',
     ofuseUrl: '',
     doneruUrl: '',
     amazonWishlistUrl: '',
@@ -37,13 +38,13 @@ const DEFAULT_UI_CONFIG = {
     },
     navButtons: {
         search: { label: '曲を検索', enabled: true },
-        printGakufu: { label: 'ぷりんと楽譜', enabled: true },
         list: { label: '曲リスト', enabled: true },
         ranking: { label: 'ランキング', enabled: true },
         news: { label: 'お知らせ', enabled: true },
         requests: { label: 'リクエスト', enabled: true },
         suggest: { label: 'おまかせ選曲', enabled: true },
         setlist: { label: 'セトリ提案', enabled: true },
+        printGakufu: { label: 'ぷりんと楽譜', enabled: true },
     }
 };
 
@@ -149,6 +150,9 @@ export async function onRequest(context) {
                 }
                 if (!finalConfig.xUrl) {
                     finalConfig.xUrl = DEFAULT_UI_CONFIG.xUrl;
+                }
+                if (!finalConfig.printGakufuUrl) {
+                    finalConfig.printGakufuUrl = DEFAULT_UI_CONFIG.printGakufuUrl;
                 }
                 
                 return jsonResponse(finalConfig);

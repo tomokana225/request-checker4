@@ -61,6 +61,7 @@ export interface UiConfig {
     primaryColor: string;
     twitcastingUrl?: string;
     xUrl?: string;
+    printGakufuUrl?: string;
     ofuseUrl?: string;
     doneruUrl?: string;
     amazonWishlistUrl?: string;
@@ -83,13 +84,13 @@ export interface UiConfig {
     };
     navButtons: {
         search: NavButtonConfig;
-        printGakufu: NavButtonConfig;
         list: NavButtonConfig;
         ranking: NavButtonConfig;
         requests: NavButtonConfig;
         news: NavButtonConfig;
         suggest: NavButtonConfig;
         setlist: NavButtonConfig;
+        printGakufu: NavButtonConfig;
     }
 }
 

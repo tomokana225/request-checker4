@@ -176,219 +176,160 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
         refreshRankings();
     };
 
-    const handleSearchSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        performSearch(searchTerm);
-    };
+    const renderSearchResults = () => {
+        if (!searchResult) return null;
 
-    const handleSuggestionClick = (song: Song) => {
-        const newSearchTerm = `${song.title}`;
-        setSearchTerm(newSearchTerm);
-        performSearch(newSearchTerm);
-    };
-
-    const renderResult = () => {
-        if (!searchResult) {
-            const hasNewSongs = newSongs.length > 0;
-            const hasPopularSongs = popularSongs.length > 0;
-
-            if (!hasNewSongs && !hasPopularSongs) {
-                return (
-                    <div className="text-center text-text-secondary-light dark:text-text-secondary-dark mt-8">
-                        <p>曲名やアーティスト名で検索してください。</p>
-                    </div>
-                );
-            }
-            
-            return (
-                <div className="space-y-12 animate-fade-in">
-                    {/* Popular Songs */}
-                    {hasPopularSongs && (
-                        <div>
-                            <h2 className="text-2xl font-bold mb-4 px-1">人気の曲</h2>
-                            <div className="space-y-3">
-                                {popularSongs.map(song => (
-                                    <SongCard 
-                                        key={`${song.title}-${song.artist}`} 
-                                        song={song} 
-                                        onLike={handleLike} 
-                                        isLiking={isLiking === song.title} 
-                                        isLiked={likedSongs.has(song.title)}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Recently Added Songs */}
-                    {hasNewSongs && (
-                        <div>
-                            <h2 className="text-2xl font-bold mb-4 px-1">最近追加された曲</h2>
-                            <div className="space-y-3">
-                                {newSongs.map(song => (
-                                    <SongCard 
-                                        key={`${song.title}-${song.artist}`}
-                                        song={song} 
-                                        onLike={handleLike} 
-                                        isLiking={isLiking === song.title} 
-                                        isLiked={likedSongs.has(song.title)}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        switch (searchResult.status) {
-            case 'found':
-                return (
-                    <div className="mt-6 animate-fade-in">
-                        <h2 className="text-xl font-bold mb-4 text-center">「<span className="text-[var(--primary-color)]">{searchResult.searchTerm}</span>」の検索結果: {searchResult.songs.length}件</h2>
-                        {likeMessage && <p className="text-center text-green-500 h-6 mb-2 flex items-center justify-center">{likeMessage}</p>}
+        return (
+            <div className="mt-8 animate-fade-in">
+                {searchResult.status === 'found' && (
+                    <>
+                        <h2 className="text-2xl font-bold mb-4">
+                            「<span style={{color: 'var(--primary-color)'}}>{searchResult.searchTerm}</span>」の検索結果 ({searchResult.songs.length}件)
+                        </h2>
                         <div className="space-y-3">
                             {searchResult.songs.map((song, index) => 
                                 <SongCard 
                                     key={`${song.title}-${index}`} 
-                                    song={song} 
+                                    song={song}
                                     onLike={handleLike}
                                     isLiking={isLiking === song.title}
                                     isLiked={likedSongs.has(song.title)}
                                 />
                             )}
                         </div>
-                    </div>
-                );
-            case 'notFound':
-                const printGakufuUrl = `https://www.print-gakufu.com/search/result/score___keyword__${encodeURIComponent(searchResult.searchTerm)}/`;
-                return (
-                    <div className="text-center text-text-secondary-light dark:text-text-secondary-dark mt-8 p-6 bg-input-bg-light dark:bg-card-background-dark/50 rounded-lg animate-fade-in border border-border-light dark:border-border-dark">
-                        <p className="mb-4 text-text-primary-light dark:text-text-primary-dark">「<span className="font-bold text-[var(--primary-color)]">{searchResult.searchTerm}</span>」は見つかりませんでした。</p>
-                        <div className="flex flex-wrap justify-center items-center gap-4">
-                            <button 
-                                onClick={() => setIsRequestModalOpen(true)} 
-                                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 rounded-lg font-semibold text-white shadow"
+                    </>
+                )}
+                {searchResult.status === 'notFound' && (
+                    <div className="text-center py-8 bg-input-bg-light dark:bg-card-background-dark/50 p-6 rounded-lg border border-border-light dark:border-border-dark">
+                        <h3 className="text-xl font-semibold mb-2">検索結果が見つかりませんでした。</h3>
+                        <p className="text-text-secondary-light dark:text-text-secondary-dark mb-6">
+                            「<strong style={{color: 'var(--primary-color)'}}>{searchResult.searchTerm}</strong>」を含む曲はリストにありません。
+                        </p>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <button
+                                onClick={() => setIsRequestModalOpen(true)}
+                                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-transform transform hover:scale-105"
                             >
-                               <PlusIcon className="w-5 h-5" /> この曲をリクエストする
+                                <PlusIcon className="w-5 h-5" />
+                                <span>この曲をリクエストする</span>
                             </button>
-                            <a 
-                                href={printGakufuUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 rounded-lg font-semibold text-white shadow"
-                            >
-                               <DocumentTextIcon className="w-5 h-5" /> ぷりんと楽譜で探す
-                            </a>
+                            {uiConfig.printGakufuUrl && (
+                                <a
+                                    href={`${uiConfig.printGakufuUrl}search/result/?search_type=all&q=${encodeURIComponent(searchResult.searchTerm)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-transform transform hover:scale-105"
+                                >
+                                    <DocumentTextIcon className="w-5 h-5" />
+                                    <span>ぷりんと楽譜で探す</span>
+                                </a>
+                            )}
                         </div>
                     </div>
-                );
-            case 'related':
-                 return (
-                    <div className="mt-6 animate-fade-in">
-                        <p className="text-center text-text-secondary-light dark:text-text-secondary-dark mb-4">「<span className="font-bold text-[var(--primary-color)]">{searchResult.searchTerm}</span>」は見つかりませんでした。もしかして...</p>
-                        <div className="space-y-3">
-                            {searchResult.songs.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} />)}
-                        </div>
-                    </div>
-                );
-            default:
-                return null;
-        }
+                )}
+            </div>
+        );
     };
     
+    const renderWelcomeContent = () => {
+         if (searchResult) return null;
+         return (
+             <div className="mt-8 animate-fade-in space-y-8">
+                 {/* Popular Songs */}
+                 {popularSongs.length > 0 && (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">人気の曲</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {popularSongs.map((song, index) => (
+                                <SongCard 
+                                    key={`${song.title}-${index}`} 
+                                    song={song}
+                                    onLike={handleLike}
+                                    isLiking={isLiking === song.title}
+                                    isLiked={likedSongs.has(song.title)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
+                 
+                 {/* New Songs */}
+                 {newSongs.length > 0 && (
+                     <div>
+                        <h2 className="text-2xl font-bold mb-4">最近追加された曲</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {newSongs.map((song, index) => (
+                               <SongCard 
+                                    key={`${song.title}-${index}`} 
+                                    song={song}
+                                    onLike={handleLike}
+                                    isLiking={isLiking === song.title}
+                                    isLiked={likedSongs.has(song.title)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                 )}
+
+                 
+             </div>
+         );
+    };
+
     return (
-        <div className="w-full max-w-2xl mx-auto" ref={searchContainerRef}>
-            <form onSubmit={handleSearchSubmit} className="relative">
+        <div className="w-full max-w-4xl mx-auto">
+            <h2 className="text-xl sm:text-2xl font-bold text-center mb-4">{uiConfig.subtitle}</h2>
+            <div ref={searchContainerRef} className="relative w-full max-w-lg mx-auto">
                 <div className="relative">
-                    <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-text-secondary-light dark:text-text-secondary-dark pointer-events-none" />
+                    <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
                     <input
-                        type="text"
+                        type="search"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="曲名 or アーティスト名"
-                        className="w-full bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark rounded-full py-4 pl-14 pr-14 text-lg placeholder:text-text-secondary-light dark:placeholder:text-text-secondary-dark focus:outline-none focus:ring-2"
+                        onKeyDown={(e) => e.key === 'Enter' && performSearch(searchTerm)}
+                        placeholder="曲名、アーティスト名で検索"
+                        className="w-full bg-card-background-light dark:bg-input-bg-dark border-2 border-border-light dark:border-border-dark rounded-full py-3 pl-12 pr-10 text-lg focus:outline-none focus:ring-2"
                         style={{'--tw-ring-color': 'var(--primary-color)'} as React.CSSProperties}
-                        autoComplete="off"
                     />
                     {searchTerm && (
-                        <button type="button" onClick={() => { setSearchTerm(''); setSearchResult(null); }} className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark hover:text-text-primary-light dark:hover:text-text-primary-dark">
-                            <XIcon className="w-6 h-6" />
+                        <button onClick={() => { setSearchTerm(''); setSearchResult(null); }} className="absolute right-4 top-1/2 -translate-y-1/2">
+                            <XIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
                         </button>
                     )}
                 </div>
-
                 {suggestions.length > 0 && (
-                    <ul className="w-full mt-1 bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg overflow-hidden max-h-80 overflow-y-auto custom-scrollbar">
-                        {suggestions.map((song, index) => (
-                            <li 
-                                key={`${song.title}-${index}`}
-                                onClick={() => handleSuggestionClick(song)}
-                                onMouseDown={(e) => e.preventDefault()}
-                                className="px-4 py-3 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition"
-                            >
-                                <span className="font-semibold">{song.title}</span>
-                                <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark ml-2">- {song.artist}</span>
-                            </li>
-                        ))}
-                    </ul>
+                    <div className="absolute z-10 w-full mt-2 bg-card-background-light dark:bg-card-background-dark border border-border-light dark:border-border-dark rounded-lg shadow-lg">
+                        <ul className="py-1">
+                            {suggestions.map((song) => (
+                                <li
+                                    key={`${song.title}-${song.artist}`}
+                                    onClick={() => {
+                                        setSearchTerm(`${song.title} / ${song.artist}`);
+                                        setSuggestions([]);
+                                        performSearch(`${song.title} / ${song.artist}`);
+                                    }}
+                                    className="px-4 py-2 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5"
+                                >
+                                    {song.title} <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">- {song.artist}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 )}
-            </form>
-
-            {(uiConfig.navButtons.list.enabled || uiConfig.navButtons.news.enabled || uiConfig.navButtons.requests.enabled || uiConfig.navButtons.suggest.enabled) && (
-                <div className="mt-4 flex flex-wrap justify-center items-center gap-3">
-                    {uiConfig.navButtons.list.enabled && (
-                        <button
-                            onClick={() => setMode('list')}
-                            className="flex items-center justify-center gap-2 px-4 py-2 text-sm rounded-full w-[48%] sm:w-auto colorful-button bg-gradient-to-r from-blue-500 to-cyan-400"
-                        >
-                            <MusicNoteIcon className="w-5 h-5" />
-                            <span>{uiConfig.navButtons.list.label}</span>
-                        </button>
-                    )}
-                    {uiConfig.navButtons.news.enabled && (
-                        <button
-                            onClick={() => setMode('news')}
-                            className="flex items-center justify-center gap-2 px-4 py-2 text-sm rounded-full w-[48%] sm:w-auto colorful-button bg-gradient-to-r from-purple-500 to-indigo-500"
-                        >
-                            <NewspaperIcon className="w-5 h-5" />
-                            <span>{uiConfig.navButtons.news.label}</span>
-                        </button>
-                    )}
-                    {uiConfig.navButtons.requests.enabled && (
-                        <button
-                            onClick={() => setMode('requests')}
-                            className="flex items-center justify-center gap-2 px-4 py-2 text-sm rounded-full w-[48%] sm:w-auto colorful-button bg-gradient-to-r from-emerald-500 to-green-500"
-                        >
-                            <CloudUploadIcon className="w-5 h-5" />
-                            <span>{uiConfig.navButtons.requests.label}</span>
-                        </button>
-                    )}
-                     {uiConfig.navButtons.suggest.enabled && (
-                        <button
-                            onClick={() => setIsSuggestModalOpen(true)}
-                            className="flex items-center justify-center gap-2 px-4 py-2 text-sm rounded-full w-[48%] sm:w-auto colorful-button bg-gradient-to-r from-amber-500 to-orange-500"
-                        >
-                            <LightBulbIcon className="w-5 h-5" />
-                            <span>{uiConfig.navButtons.suggest.label}</span>
-                        </button>
-                    )}
-                </div>
-            )}
-
-            <div className="mt-6">
-                {renderResult()}
             </div>
+            {likeMessage && <p className="text-center text-green-500 h-6 mt-2 flex items-center justify-center">{likeMessage}</p>}
+
+            {renderSearchResults()}
+            {renderWelcomeContent()}
             
-            {isRequestModalOpen && searchResult?.searchTerm && (
-                 <RequestSongModal 
-                    isOpen={isRequestModalOpen}
-                    onClose={() => setIsRequestModalOpen(false)}
-                    songTitle={searchResult.searchTerm}
-                    logRequest={logRequest}
-                    onSuccess={handleRequestSuccess}
-                />
-            )}
+             <RequestSongModal 
+                isOpen={isRequestModalOpen}
+                onClose={() => setIsRequestModalOpen(false)}
+                songTitle={searchResult?.searchTerm || ''}
+                logRequest={logRequest}
+                onSuccess={handleRequestSuccess}
+                uiConfig={uiConfig}
+            />
         </div>
     );
 };

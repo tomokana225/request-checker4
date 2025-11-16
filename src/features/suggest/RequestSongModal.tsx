@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { XIcon, ExternalLinkIcon, CheckCircleIcon, CloudUploadIcon } from '../../components/ui/Icons';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 import { containsNGWord } from '../../utils/validation';
+import { UiConfig } from '../../types';
 
 interface RequestSongModalProps {
     isOpen: boolean;
@@ -9,9 +10,10 @@ interface RequestSongModalProps {
     songTitle: string;
     logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     onSuccess: () => void;
+    uiConfig: UiConfig;
 }
 
-export const RequestSongModal: React.FC<RequestSongModalProps> = ({ isOpen, onClose, songTitle, logRequest, onSuccess }) => {
+export const RequestSongModal: React.FC<RequestSongModalProps> = ({ isOpen, onClose, songTitle, logRequest, onSuccess, uiConfig }) => {
     const [casId, setCasId] = useState('');
     const [isSending, setIsSending] = useState(false);
     const [isSent, setIsSent] = useState(false);
@@ -75,7 +77,9 @@ export const RequestSongModal: React.FC<RequestSongModalProps> = ({ isOpen, onCl
                             </div>
                             <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark bg-input-bg-light dark:bg-card-background-dark/50 p-3 rounded-md space-y-1">
                                 <p>※リクエストに必ずお応えできるわけではありません。</p>
-                                <p>※<a href="https://www.print-gakufu.com/" target="_blank" rel="noopener noreferrer" className="hover:underline" style={{color: 'var(--primary-color)'}}>「ぷりんと楽譜」<ExternalLinkIcon className="inline-block w-3 h-3"/></a>にある曲は初見で弾ける可能性があります。</p>
+                                {uiConfig.printGakufuUrl && (
+                                    <p>※<a href={uiConfig.printGakufuUrl} target="_blank" rel="noopener noreferrer" className="hover:underline" style={{color: 'var(--primary-color)'}}>「ぷりんと楽譜」<ExternalLinkIcon className="inline-block w-3 h-3"/></a>にある曲は初見で弾ける可能性があります。</p>
+                                )}
                             </div>
 
                             <button type="submit" disabled={isSending} className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-transform transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed shadow">

@@ -9,6 +9,7 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     primaryColor: '#ec4899',
     twitcastingUrl: 'https://twitcasting.tv/g:101738740616323847745',
     xUrl: 'https://x.com/',
+    printGakufuUrl: 'https://www.print-gakufu.com/',
     ofuseUrl: '',
     doneruUrl: '',
     amazonWishlistUrl: '',
@@ -24,7 +25,6 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     bodyFontFamily: "'Noto Sans JP', sans-serif",
     headingFontScale: 1.0,
     bodyFontScale: 1.0,
-    // FIX: Add the missing 'x' property to the `specialButtons` object to align with the `UiConfig` type.
     specialButtons: {
         twitcas: { label: 'ツイキャスはこちら', enabled: true },
         x: { label: 'X (Twitter) はこちら', enabled: true },
@@ -32,13 +32,13 @@ const DEFAULT_UI_CONFIG: UiConfig = {
     },
     navButtons: {
         search: { label: '曲を検索', enabled: true },
-        printGakufu: { label: 'ぷりんと楽譜', enabled: true },
         list: { label: '曲リスト', enabled: true },
         ranking: { label: 'ランキング', enabled: true },
         news: { label: 'お知らせ', enabled: true },
         requests: { label: 'リクエスト', enabled: true },
         suggest: { label: 'おまかせ選曲', enabled: true },
         setlist: { label: 'セトリ提案', enabled: true },
+        printGakufu: { label: 'ぷりんと楽譜', enabled: true },
     }
 };
 

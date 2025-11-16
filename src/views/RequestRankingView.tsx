@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import { HeartIcon, CloudUploadIcon, ExternalLinkIcon } from '../components/ui/Icons';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { containsNGWord } from '../utils/validation';
-import { RequestRankingItem } from '../types';
+import { RequestRankingItem, UiConfig } from '../types';
 
 interface RequestRankingViewProps {
     recentRequests: RequestRankingItem[];
     logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     refreshRankings: () => void;
+    uiConfig: UiConfig;
 }
 
 const RequestForm: React.FC<{
     logRequest: (term: string, artist: string, requester: string) => Promise<void>;
     refreshRankings: () => void;
-}> = ({ logRequest, refreshRankings }) => {
+    uiConfig: UiConfig;
+}> = ({ logRequest, refreshRankings, uiConfig }) => {
     const [songTitle, setSongTitle] = useState('');
     const [casId, setCasId] = useState('');
     const [isSending, setIsSending] = useState(false);
@@ -72,7 +74,9 @@ const RequestForm: React.FC<{
                 </div>
                 <div className="text-xs text-left text-text-secondary-light dark:text-text-secondary-dark bg-background-light dark:bg-card-background-dark/50 p-3 rounded-md space-y-1">
                     <p>※リクエストに必ずお応えできるわけではありません。</p>
-                    <p>※<a href="https://www.print-gakufu.com/" target="_blank" rel="noopener noreferrer" className="hover:underline" style={{color: 'var(--primary-color)'}}>「ぷりんと楽譜」<ExternalLinkIcon className="inline-block w-3 h-3"/></a>にある曲は初見で弾ける可能性があります。</p>
+                    {uiConfig.printGakufuUrl && (
+                        <p>※<a href={uiConfig.printGakufuUrl} target="_blank" rel="noopener noreferrer" className="hover:underline" style={{color: 'var(--primary-color)'}}>「ぷりんと楽譜」<ExternalLinkIcon className="inline-block w-3 h-3"/></a>にある曲は初見で弾ける可能性があります。</p>
+                    )}
                 </div>
                 {sentMessage ? (
                     <p className="text-center text-green-600 h-12 flex items-center justify-center">{sentMessage}</p>
@@ -120,7 +124,7 @@ const RecentRequestsList: React.FC<{ requests: RequestRankingItem[] }> = ({ requ
     );
 };
 
-export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ recentRequests, logRequest, refreshRankings }) => {
+export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ recentRequests, logRequest, refreshRankings, uiConfig }) => {
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
             <h2 className="text-3xl font-bold text-center mb-2 flex items-center justify-center gap-3">
@@ -131,7 +135,7 @@ export const RequestRankingView: React.FC<RequestRankingViewProps> = ({ recentRe
                 リストにない曲はこちらからリクエストできます。
             </p>
             
-            <RequestForm logRequest={logRequest} refreshRankings={refreshRankings} />
+            <RequestForm logRequest={logRequest} refreshRankings={refreshRankings} uiConfig={uiConfig} />
 
             <RecentRequestsList requests={recentRequests} />
         </div>
