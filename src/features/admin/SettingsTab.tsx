@@ -10,7 +10,7 @@ interface SettingsTabProps {
 const backgroundPresets = [
   { name: '楽譜', url: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070&auto=format&fit=crop' },
   { name: 'ピアノ', url: 'https://images.unsplash.com/photo-1520444453406-52ab68434346?q=80&w=2070&auto=format&fit=crop' },
-  { name: 'ステージ', url: 'https://images.unsplash.com/photo-1543305986-a783e7a68028?q=80&w=2070&auto=format&fit=crop' },
+  { name: 'ステージ', url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop' },
   { name: 'ギター', url: 'https://images.unsplash.com/photo-1550291652-6ea9114a47b1?q=80&w=2070&auto=format&fit=crop' },
   { name: 'レコード', url: 'https://images.unsplash.com/photo-1502444330042-d1a1ddf9bb5b?q=80&w=1974&auto=format&fit=crop' },
 ];

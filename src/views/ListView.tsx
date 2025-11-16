@@ -85,8 +85,8 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
                 return (
                     <div className="space-y-2">
                         {artists.map(artist => (
-                             <div key={artist} onClick={() => setViewState({ mode: 'by_artist', artist })} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark p-3 sm:p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                                <span className="font-semibold">{artist}</span>
+                             <div key={artist} onClick={() => setViewState({ mode: 'by_artist', artist })} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark p-3 sm:p-4 rounded-lg flex items-center justify-between cursor-pointer fancy-card shadow-sm">
+                                <h3 className="font-semibold text-text-primary-light dark:text-text-primary-dark">{artist}</h3>
                                 <ChevronRightIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
                             </div>
                         ))}
@@ -96,8 +96,8 @@ export const ListView: React.FC<ListViewProps> = ({ songs, logLike, refreshRanki
                 return (
                     <div className="space-y-2">
                         {genres.map(genre => (
-                             <div key={genre} onClick={() => setViewState({ mode: 'by_genre', genre })} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark p-3 sm:p-4 rounded-lg flex items-center justify-between cursor-pointer hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                                <span className="font-semibold">{genre}</span>
+                             <div key={genre} onClick={() => setViewState({ mode: 'by_genre', genre })} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark p-3 sm:p-4 rounded-lg flex items-center justify-between cursor-pointer fancy-card shadow-sm">
+                                <h3 className="font-semibold text-text-primary-light dark:text-text-primary-dark">{genre}</h3>
                                 <ChevronRightIcon className="w-5 h-5 text-text-secondary-light dark:text-text-secondary-dark" />
                             </div>
                         ))}

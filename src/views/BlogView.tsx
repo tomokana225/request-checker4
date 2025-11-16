@@ -67,7 +67,7 @@ export const BlogView: React.FC<BlogViewProps> = ({ posts }) => {
                     {sortedPosts.map(post => (
                         <article 
                             key={post.id} 
-                            className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark rounded-lg shadow-md overflow-hidden transition-transform transform hover:scale-[1.02] cursor-pointer"
+                            className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark rounded-lg shadow-md overflow-hidden cursor-pointer fancy-card"
                             onClick={() => setSelectedPost(post)}
                         >
                             {post.imageUrl && (

@@ -66,6 +66,14 @@ const App: React.FC = () => {
     useEffect(() => {
         const root = document.documentElement;
         root.style.setProperty('--primary-color', uiConfig.primaryColor);
+        // This is a simple way to get a secondary color. A more complex function could derive it.
+        // For pink, a nice pair is sky blue.
+        if (uiConfig.primaryColor.includes('ec4899')) { // Default Pink
+             root.style.setProperty('--secondary-color', '#38bdf8'); // sky-400
+        } else {
+            // A generic brighter version or a fixed alternative
+             root.style.setProperty('--secondary-color', '#67e8f9'); // cyan-300
+        }
         root.style.setProperty('--heading-font', uiConfig.headingFontFamily || "'Kiwi Maru', serif");
         root.style.setProperty('--body-font', uiConfig.bodyFontFamily || "'Noto Sans JP', sans-serif");
         root.style.setProperty('--heading-font-scale', String(uiConfig.headingFontScale || 1));
@@ -191,7 +199,7 @@ const App: React.FC = () => {
                 
                 {/* Main Content */}
                 <div className="flex-1 flex flex-col overflow-hidden">
-                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-md px-4 sm:px-6 py-4">
+                    <header className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark shadow-lg px-4 sm:px-6 py-4 border-b-2" style={{ borderColor: 'var(--primary-color)' }}>
                         <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-3">
                             {/* Left Section: Menu Button */}
                             <div className="flex-1 flex justify-start order-2 sm:order-1">
@@ -256,19 +264,19 @@ const App: React.FC = () => {
                     </main>
                      <footer className="flex-shrink-0 bg-card-background-light dark:bg-card-background-dark border-t border-border-light dark:border-border-dark p-3 pb-8 sm:p-3 flex flex-wrap justify-center items-center gap-4">
                         {uiConfig.specialButtons?.twitcas?.enabled && uiConfig.twitcastingUrl && uiConfig.twitcastingUrl.trim() !== '' && (
-                            <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap bg-[#179BF1] hover:bg-[#1588d6]">
+                            <a href={uiConfig.twitcastingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-[#179BF1] to-[#4ab3f3] hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
                                 {uiConfig.twitcastingIconUrl ? <img src={uiConfig.twitcastingIconUrl} alt="TwitCasting" className="w-5 h-5" /> : <TwitcasIcon className="w-5 h-5"/>}
                                 <span>{uiConfig.specialButtons.twitcas.label}</span>
                             </a>
                         )}
                         {uiConfig.specialButtons?.x?.enabled && uiConfig.xUrl && uiConfig.xUrl.trim() !== '' && (
-                             <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors text-sm whitespace-nowrap bg-gray-900 hover:bg-black dark:bg-white dark:hover:bg-gray-200 text-white dark:text-black">
+                             <a href={uiConfig.xUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-gray-800 to-black dark:from-gray-200 dark:to-white text-white dark:text-black hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
                                 {uiConfig.xIconUrl ? <img src={uiConfig.xIconUrl} alt="X" className="w-5 h-5" /> : <XSocialIcon className="w-5 h-5" />}
                                 <span>{uiConfig.specialButtons.x.label}</span>
                             </a>
                         )}
                          {uiConfig.specialButtons?.support?.enabled && (
-                            <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold transition-colors text-sm whitespace-nowrap bg-pink-500 hover:bg-pink-600">
+                            <button onClick={() => setIsSupportModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-white font-semibold text-sm whitespace-nowrap bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 shadow-md">
                                 {uiConfig.supportIconUrl ? <img src={uiConfig.supportIconUrl} alt="Support" className="w-5 h-5" /> : <HeartIcon className="w-5 h-5"/>}
                                 <span>{uiConfig.specialButtons.support.label}</span>
                             </button>

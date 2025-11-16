@@ -31,17 +31,17 @@ const SongRankingTab: React.FC<{ songs: RankingItem[] }> = ({ songs }) => {
                 const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.artist} ${item.id}`)}`;
                 const lyricsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${item.artist} ${item.id} 歌詞`)}`;
                 return (
-                    <div key={item.id} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark p-2 sm:p-3 rounded-lg">
+                    <div key={item.id} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark p-2 sm:p-3 rounded-lg fancy-card shadow-sm">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 sm:gap-3 flex-grow min-w-0 text-left">
                                 <div className="text-lg sm:text-xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
                                 <div className="flex-grow min-w-0">
-                                    <h3 className="font-bold text-sm sm:text-base truncate">{item.id}</h3>
+                                    <h3 className="font-bold text-sm sm:text-base truncate text-text-primary-light dark:text-text-primary-dark">{item.id}</h3>
                                     <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate">{item.artist}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3 ml-2 flex-shrink-0">
-                                <p className="text-sm font-semibold hidden sm:block" style={{color: 'var(--primary-color)'}}>{item.count}回</p>
+                                <p className="text-sm font-semibold hidden sm:block text-text-primary-light dark:text-text-primary-dark">{item.count}回</p>
                                 <ActionButton href={youtubeSearchUrl} title="YouTubeで検索" icon={<YouTubeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-red-600 hover:text-red-500" />} />
                                 <ActionButton href={lyricsSearchUrl} title="歌詞を検索" icon={<DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5" />} />
                             </div>
@@ -63,14 +63,14 @@ const ArtistRankingTab: React.FC<{ artists: ArtistRankingItem[], songs: Song[] }
                 const artistSongs = songs.filter(s => s.artist === item.id).sort((a,b) => a.title.localeCompare(b.title, 'ja'));
 
                 return (
-                    <div key={item.id} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark rounded-lg overflow-hidden">
+                    <div key={item.id} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark rounded-lg overflow-hidden fancy-card shadow-sm">
                         <button onClick={() => setExpandedArtist(isExpanded ? null : item.id)} className="w-full p-2 sm:p-3 flex items-center justify-between text-left hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                             <div className="flex items-center gap-2 sm:gap-3 flex-grow min-w-0">
                                 <div className="text-lg sm:text-xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
-                                <h3 className="font-bold text-sm sm:text-base truncate">{item.id}</h3>
+                                <h3 className="font-bold text-sm sm:text-base truncate text-text-primary-light dark:text-text-primary-dark">{item.id}</h3>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                                <div className="text-sm sm:text-base font-semibold" style={{color: 'var(--primary-color)'}}>{item.count}回</div>
+                                <div className="text-sm sm:text-base font-semibold text-text-primary-light dark:text-text-primary-dark">{item.count}回</div>
                                 <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                             </div>
                         </button>
@@ -107,12 +107,12 @@ const LikeRankingList: React.FC<{ songs: RankingItem[] }> = ({ songs }) => {
                 const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(`${item.artist} ${item.id}`)}`;
                 const lyricsSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${item.artist} ${item.id} 歌詞`)}`;
                 return (
-                    <div key={item.id} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark p-2 sm:p-3 rounded-lg">
+                    <div key={item.id} className="bg-input-bg-light dark:bg-input-bg-dark border border-border-light dark:border-border-dark p-2 sm:p-3 rounded-lg fancy-card shadow-sm">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 sm:gap-3 flex-grow min-w-0 text-left">
                                 <div className="text-lg sm:text-xl w-8 text-center flex-shrink-0">{getMedal(index + 1)}</div>
                                 <div className="flex-grow min-w-0">
-                                    <h3 className="font-bold text-sm sm:text-base truncate">{item.id}</h3>
+                                    <h3 className="font-bold text-sm sm:text-base truncate text-text-primary-light dark:text-text-primary-dark">{item.id}</h3>
                                     <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark truncate">{item.artist}</p>
                                 </div>
                             </div>

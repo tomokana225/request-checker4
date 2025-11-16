@@ -245,7 +245,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
             case 'found':
                 return (
                     <div className="mt-6 animate-fade-in">
-                        <h2 className="text-xl font-bold mb-4 text-center">「<span style={{color: 'var(--primary-color)'}}>{searchResult.searchTerm}</span>」の検索結果: {searchResult.songs.length}件</h2>
+                        <h2 className="text-xl font-bold mb-4 text-center">「<span className="text-[var(--primary-color)]">{searchResult.searchTerm}</span>」の検索結果: {searchResult.songs.length}件</h2>
                         {likeMessage && <p className="text-center text-green-500 h-6 mb-2 flex items-center justify-center">{likeMessage}</p>}
                         <div className="space-y-3">
                             {searchResult.songs.map((song, index) => 
@@ -264,11 +264,11 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                 const printGakufuUrl = `https://www.print-gakufu.com/search/result/score___keyword__${encodeURIComponent(searchResult.searchTerm)}/`;
                 return (
                     <div className="text-center text-text-secondary-light dark:text-text-secondary-dark mt-8 p-6 bg-input-bg-light dark:bg-card-background-dark/50 rounded-lg animate-fade-in border border-border-light dark:border-border-dark">
-                        <p className="mb-4 text-text-primary-light dark:text-text-primary-dark">「<span className="font-bold" style={{color: 'var(--primary-color)'}}>{searchResult.searchTerm}</span>」は見つかりませんでした。</p>
+                        <p className="mb-4 text-text-primary-light dark:text-text-primary-dark">「<span className="font-bold text-[var(--primary-color)]">{searchResult.searchTerm}</span>」は見つかりませんでした。</p>
                         <div className="flex flex-wrap justify-center items-center gap-4">
                             <button 
                                 onClick={() => setIsRequestModalOpen(true)} 
-                                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-lg font-semibold text-white transition-transform transform hover:scale-105 shadow"
+                                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 rounded-lg font-semibold text-white shadow"
                             >
                                <PlusIcon className="w-5 h-5" /> この曲をリクエストする
                             </button>
@@ -276,7 +276,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
                                 href={printGakufuUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-green-500 hover:bg-green-600 rounded-lg font-semibold text-white transition-transform transform hover:scale-105 shadow"
+                                className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 hover:shadow-lg hover:-translate-y-0.5 transform transition-all duration-200 rounded-lg font-semibold text-white shadow"
                             >
                                <DocumentTextIcon className="w-5 h-5" /> ぷりんと楽譜で探す
                             </a>
@@ -286,7 +286,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
             case 'related':
                  return (
                     <div className="mt-6 animate-fade-in">
-                        <p className="text-center text-text-secondary-light dark:text-text-secondary-dark mb-4">「<span className="font-bold" style={{color: 'var(--primary-color)'}}>{searchResult.searchTerm}</span>」は見つかりませんでした。もしかして...</p>
+                        <p className="text-center text-text-secondary-light dark:text-text-secondary-dark mb-4">「<span className="font-bold text-[var(--primary-color)]">{searchResult.searchTerm}</span>」は見つかりませんでした。もしかして...</p>
                         <div className="space-y-3">
                             {searchResult.songs.map((song, index) => <SongCard key={`${song.title}-${index}`} song={song} />)}
                         </div>

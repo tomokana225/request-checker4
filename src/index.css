@@ -6,6 +6,7 @@
 :root {
   --primary-color: #3b82f6; /* Default Blue */
   --primary-color-hover: #2563eb;
+  --secondary-color: #38bdf8; /* sky-400 for gradients */
 
   --background-light: #f1f5f9; /* slate-100 */
   --background-dark: #020617; /* slate-950 */
@@ -35,16 +36,23 @@ body {
   font-family: var(--body-font);
   font-size: calc(1rem * var(--body-font-scale));
   @apply bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark transition-colors duration-300;
+  @apply bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-900 dark:to-slate-950;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--heading-font);
   font-weight: 700;
+  @apply text-transparent bg-clip-text bg-gradient-to-r from-[var(--primary-color)] to-[var(--secondary-color)];
 }
 h1 { font-size: calc(2.25rem * var(--heading-font-scale)); } /* text-4xl base */
 h2 { font-size: calc(1.875rem * var(--heading-font-scale)); } /* text-3xl base */
 h3 { font-size: calc(1.5rem * var(--heading-font-scale)); } /* text-2xl base */
 h4 { font-size: calc(1.25rem * var(--heading-font-scale)); } /* text-xl base */
+
+.fancy-card {
+    @apply transition-all duration-300 border-l-4 hover:shadow-xl hover:-translate-y-1;
+    border-left-color: var(--primary-color);
+}
 
 .text-shadow-lg { text-shadow: 0 0 15px rgba(0,0,0,0.1); }
 .dark .text-shadow-lg { text-shadow: 0 0 15px rgba(0,0,0,0.5); }
