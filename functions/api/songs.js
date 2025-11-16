@@ -11,7 +11,7 @@ const PLAYABLE_SONGS_EXAMPLE_STR = "夜に駆ける,YOASOBI,J-Pop,new\nPretender
 
 const DEFAULT_UI_CONFIG = {
     mainTitle: 'ともかなのリクエスト曲ー検索',
-    subtitle: '弾ける曲 or ぷりんと楽譜にある曲かチェックできます',
+    subtitle: 'ともかなの弾ける曲を検索できます',
     primaryColor: '#ec4899',
     twitcastingUrl: 'https://twitcasting.tv/g:101738740616323847745',
     xUrl: 'https://x.com/',

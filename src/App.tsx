@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useApi } from './hooks/useApi';
 import { Mode } from './types';
@@ -226,7 +227,6 @@ const App: React.FC = () => {
                             {/* Center Section: Title */}
                             <div className="w-full sm:w-auto flex-shrink-0 px-2 text-center order-1 sm:order-2">
                                  <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold whitespace-normal sm:whitespace-nowrap" title={uiConfig.mainTitle}>{uiConfig.mainTitle}</h1>
-                                 <p className="text-xs sm:text-sm text-text-secondary-light dark:text-text-secondary-dark hidden sm:block">配信で演奏できる曲を調べることができます。</p>
                             </div>
 
                             {/* Right Section: Icons */}

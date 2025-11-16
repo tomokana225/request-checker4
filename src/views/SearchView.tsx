@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Song, SearchResult, UiConfig, RankingItem, Mode } from '../types';
 import { normalizeForSearch } from '../utils/normalization';
@@ -232,7 +233,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ songs, logSearch, logLik
     return (
         <div className="w-full max-w-2xl mx-auto animate-fade-in">
             <div className="text-center mb-8">
-                <p className="text-base sm:text-lg text-text-secondary-light dark:text-text-secondary-dark">{uiConfig.subtitle}</p>
+                <p className="text-base sm:text-lg text-text-primary-light dark:text-text-primary-dark">{uiConfig.subtitle}</p>
             </div>
             <form onSubmit={handleSearchSubmit} className="mb-6 relative" ref={searchContainerRef}>
                 <div className="relative">

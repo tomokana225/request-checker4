@@ -75,12 +75,12 @@ const ArtistRankingTab: React.FC<{ artists: ArtistRankingItem[], songs: Song[] }
                             </div>
                         </button>
                         {isExpanded && (
-                            <div className="pl-12 pr-4 pb-3 pt-1 bg-background-light dark:bg-card-background-dark/50 animate-fade-in">
+                            <div className="pl-12 pr-4 pb-3 pt-1 bg-white dark:bg-gray-800 animate-fade-in">
                                 {artistSongs.length > 0 ? (
                                     <ul className="space-y-2">
                                         {artistSongs.map(song => (
                                             <li key={song.title} className="flex justify-between items-center text-sm">
-                                                <span className="text-text-primary-light dark:text-text-primary-dark truncate">{song.title}</span>
+                                                <span className="text-gray-800 dark:text-gray-200 truncate">{song.title}</span>
                                                 <div className="flex items-center gap-3 flex-shrink-0">
                                                     <ActionButton href={`https://www.youtube.com/results?search_query=${encodeURIComponent(`${song.artist} ${song.title}`)}`} title="YouTube" icon={<YouTubeIcon className="w-5 h-5 text-red-600" />} />
                                                     <ActionButton href={`https://www.google.com/search?q=${encodeURIComponent(`${song.artist} ${song.title} 歌詞`)}`} title="歌詞" icon={<DocumentTextIcon className="w-4 h-4" />} />
